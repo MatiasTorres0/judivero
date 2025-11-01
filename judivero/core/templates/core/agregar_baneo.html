@@ -1,0 +1,107 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Agregar Baneo - Judivero{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Header Section -->
+    <div class="text-center mb-8">
+        <div class="bg-red-100 p-4 rounded-full inline-block mb-4">
+            <i class="fas fa-ban text-red-600 text-3xl"></i>
+        </div>
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
+            Registrar Nuevo Baneo
+        </h1>
+        <p class="text-lg text-gray-600">
+            Completa la información del usuario baneado
+        </p>
+    </div>
+
+    <!-- Form Section -->
+    <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Form Fields -->
+            <div class="grid gap-6 md:grid-cols-1">
+                {% for field in form %}
+                <div class="space-y-2">
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                        <span class="text-red-500">*</span>
+                        {% endif %}
+                    </label>
+                    
+                    {{ field }}
+                    
+                    {% if field.help_text %}
+                    <p class="text-sm text-gray-500">{{ field.help_text }}</p>
+                    {% endif %}
+                    
+                    {% if field.errors %}
+                    <div class="text-sm text-red-600">
+                        {{ field.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-100">
+                <a href="{% url 'inicio' %}" 
+                   class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center flex items-center justify-center">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Cancelar
+                </a>
+                
+                <button type="submit" 
+                        class="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center">
+                    <i class="fas fa-gavel mr-2"></i>
+                    Registrar Baneo
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Warning Section -->
+    <div class="mt-8 bg-red-50 rounded-xl p-6 border border-red-200">
+        <div class="flex items-start">
+            <div class="bg-red-100 p-2 rounded-full mr-4">
+                <i class="fas fa-exclamation-triangle text-red-600"></i>
+            </div>
+            <div>
+                <h3 class="font-semibold text-red-800 mb-2">Importante</h3>
+                <ul class="text-sm text-red-700 space-y-1">
+                    <li>• Verifica cuidadosamente la información del usuario</li>
+                    <li>• Asegúrate de tener evidencia del motivo del baneo</li>
+                    <li>• Establece fechas claras para el baneo y desbaneo</li>
+                    <li>• Los baneos son acciones serias - úsalos con responsabilidad</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    input, select, textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+    
+    input::placeholder, textarea::placeholder {
+        color: #9ca3af;
+    }
+</style>
+{% endblock %}

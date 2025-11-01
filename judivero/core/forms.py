@@ -1,27 +1,28 @@
 from django import forms
-from .models import Nota, Comando
+from .models import Nota, Comando, Baneos
 
 
 class NotaForm(forms.ModelForm):
     class Meta:
         model = Nota
-        fields = '__all__'
+        fields = ['titulo', 'nota', 'etiqueta', 'importante']
+        exclude = ['user', 'fecha_creacion', 'fecha_actualizacion']
         widgets = {
             'titulo': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Título de la nota'
             }),
-            'contenido': forms.Textarea(attrs={
+            'nota': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 5,
                 'placeholder': 'Escribe el contenido aquí...'
             }),
-            'fecha_creacion': forms.DateTimeInput(attrs={
+            'etiqueta': forms.TextInput(attrs={
                 'class': 'form-control',
-                'type': 'datetime-local'
-            }, format='%Y-%m-%dT%H:%M'),
-            'autor': forms.Select(attrs={
-                'class': 'form-select'
+                'placeholder': 'Etiqueta (opcional)'
+            }),
+            'importante': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
             })
         }
 
@@ -55,4 +56,32 @@ class ComandoForm(forms.ModelForm):
             'autor': forms.Select(attrs={
                 'class': 'form-select'
             })
+        }
+
+class BaneoForm(forms.ModelForm):
+    class Meta:
+        model = Baneos
+        fields = '__all__'
+        widgets = {
+            'nombre_usuario': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nombre de usuario'
+            }),
+            'motivo': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Describe el motivo del baneo...'
+            }),
+            'desbaneo': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }, format='%Y-%m-%dT%H:%M'),
+        }
+        labels = {
+            'nombre_usuario': 'Nombre de usuario',
+            'motivo': 'Motivo',
+            'desbaneo': 'Fecha de desbaneo',
+        }
+        help_texts = {
+            'desbaneo': 'Deja en blanco si el baneo es permanente.',
         }
