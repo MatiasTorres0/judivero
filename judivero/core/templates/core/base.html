@@ -48,6 +48,47 @@
             margin-right: 0.5rem;
         }
         
+        /* Dropdown Canal */
+        .dropdown {
+            position: relative;
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            z-index: 100;
+        }
+        
+        .dropdown.active .dropdown-menu {
+            display: block;
+        }
+        
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+        
+        .dropdown-item.active {
+            background: #eff6ff;
+            color: #2563eb;
+            font-weight: 600;
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .nav-link {
@@ -78,7 +119,7 @@
                 </div>
                 
                 <!-- Navigation Links -->
-                <div class="flex flex-wrap justify-center gap-2 md:gap-3">
+                <div class="flex flex-wrap justify-center items-center gap-2 md:gap-3">
                     <a href="{% url 'inicio' %}" 
                        class="nav-link {% if request.path == '/' %}nav-link-active{% endif %}">
                         <i class="fas fa-home nav-icon"></i>
@@ -90,10 +131,59 @@
                         <i class="fas fa-sticky-note nav-icon"></i>
                         <span>Notas</span>
                     </a>
+                    
+                    <!-- Selector de Canal -->
+                    {% if canales %}
+                    <div class="dropdown">
+                        <button onclick="toggleDropdown()" 
+                                class="nav-link bg-white bg-opacity-20 hover:bg-white hover:bg-opacity-100 hover:text-purple-700 flex items-center gap-2">
+                            <i class="fab fa-twitch"></i>
+                            <span class="hidden md:inline">{{ canal_actual.nombre|default:"Seleccionar Canal" }}</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <div class="px-4 py-2 border-b border-gray-200 bg-gray-50">
+                                <p class="text-xs font-semibold text-gray-600 uppercase">Canales como Mod</p>
+                            </div>
+                            <div class="py-2">
+                                {% for canal in canales %}
+                                <a href="{% url 'cambiar_canal' canal.id %}?next={{ request.path }}" 
+                                   class="dropdown-item {% if canal.id == canal_actual.id %}active{% endif %}">
+                                    <i class="fab fa-twitch mr-2"></i>
+                                    <div class="flex-1">
+                                        <div class="font-medium">{{ canal.nombre }}</div>
+                                        <div class="text-xs text-gray-500">@{{ canal.streamer }}</div>
+                                    </div>
+                                    {% if canal.id == canal_actual.id %}
+                                    <i class="fas fa-check ml-auto text-green-500"></i>
+                                    {% endif %}
+                                </a>
+                                {% endfor %}
+                            </div>
+                            <div class="px-4 py-2 border-t border-gray-200 bg-gray-50">
+                                <a href="/admin/core/canaltwitch/add/" class="text-xs text-blue-600 hover:text-blue-700 flex items-center">
+                                    <i class="fas fa-plus mr-1"></i>
+                                    Agregar canal
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </nav>
+
+    <!-- Canal Actual Badge (mobile) -->
+    {% if canal_actual %}
+    <div class="md:hidden bg-purple-100 border-b border-purple-200 px-4 py-2">
+        <div class="text-center text-sm">
+            <i class="fab fa-twitch text-purple-600 mr-1"></i>
+            <span class="font-semibold text-purple-800">{{ canal_actual.nombre }}</span>
+            <span class="text-purple-600 text-xs ml-1">(@{{ canal_actual.streamer }})</span>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
@@ -106,10 +196,10 @@
         <div class="container mx-auto px-4">
             <div class="text-center">
                 <p class="text-lg font-semibold mb-2">
-                    <i class="fas fa-code mr-2"></i>Sistema de Gestión Judivero
+                    <i class="fas fa-shield-alt mr-2"></i>Sistema de Moderación Judivero
                 </p>
                 <p class="text-sm opacity-80">
-                    Comandos, Notas y Baneos - Organizado y Eficiente
+                    Gestión Multi-Canal para Moderadores de Twitch
                 </p>
                 <div class="mt-4 flex justify-center gap-4 text-sm opacity-70">
                     <span><i class="fas fa-terminal mr-1"></i> Django 5.2</span>
@@ -119,5 +209,21 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        // Toggle Dropdown
+        function toggleDropdown() {
+            const dropdown = document.querySelector('.dropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.dropdown');
+            if (dropdown && !dropdown.contains(event.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+    </script>
 </body>
 </html>

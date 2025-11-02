@@ -1,0 +1,149 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Sin Canales - Judivero{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Empty State -->
+    <div class="text-center py-16">
+        <!-- Icon -->
+        <div class="mb-8">
+            <div class="bg-purple-100 rounded-full p-8 inline-block">
+                <i class="fab fa-twitch text-purple-400 text-6xl"></i>
+            </div>
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">
+            No hay canales configurados
+        </h1>
+
+        <!-- Description -->
+        <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Para comenzar a usar el sistema de moderación, primero debes agregar los canales de Twitch donde eres moderador.
+        </p>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <a href="/admin/core/canaltwitch/add/" 
+               class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-4 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl inline-flex items-center justify-center">
+                <i class="fas fa-plus-circle mr-2 text-xl"></i>
+                Agregar mi primer canal
+            </a>
+            
+            <a href="/admin/core/canaltwitch/" 
+               class="bg-white hover:bg-gray-50 text-gray-700 px-8 py-4 rounded-lg font-semibold transition-all border-2 border-gray-300 inline-flex items-center justify-center">
+                <i class="fas fa-cog mr-2"></i>
+                Ir al panel de administración
+            </a>
+        </div>
+
+        <!-- Instructions -->
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-8 text-left max-w-2xl mx-auto">
+            <div class="flex items-start">
+                <div class="bg-blue-100 p-3 rounded-full mr-4 flex-shrink-0">
+                    <i class="fas fa-info-circle text-blue-600 text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-blue-900 mb-3">
+                        ¿Cómo agregar un canal?
+                    </h3>
+                    <ol class="text-blue-800 space-y-2 list-decimal list-inside">
+                        <li>Haz clic en "Agregar mi primer canal"</li>
+                        <li>Completa los datos del canal:
+                            <ul class="ml-6 mt-1 space-y-1 text-sm">
+                                <li>• <strong>Nombre:</strong> Nombre del canal (ej: "ElRubius")</li>
+                                <li>• <strong>Streamer:</strong> Nombre de usuario del streamer (ej: "elrubius")</li>
+                                <li>• <strong>URL:</strong> Link del canal de Twitch (opcional)</li>
+                                <li>• <strong>Descripción:</strong> Notas sobre reglas o configuración (opcional)</li>
+                            </ul>
+                        </li>
+                        <li>Guarda y comienza a gestionar comandos, notas y baneos</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alternative Method -->
+        <div class="mt-12 bg-gray-50 border border-gray-200 rounded-xl p-6 max-w-2xl mx-auto">
+            <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center justify-center">
+                <i class="fas fa-terminal mr-2 text-gray-600"></i>
+                Método alternativo: Usar Django Shell
+            </h3>
+            <p class="text-gray-600 mb-4 text-sm">
+                Si prefieres agregar canales mediante código, puedes usar el shell de Django:
+            </p>
+            <div class="bg-gray-800 rounded-lg p-4 text-left">
+                <pre class="text-green-400 text-sm overflow-x-auto"><code>python manage.py shell
+
+from core.models import CanalTwitch
+
+canal = CanalTwitch.objects.create(
+    nombre="NombreDelCanal",
+    streamer="usuario_twitch",
+    descripcion="Notas sobre el canal",
+    url_twitch="https://twitch.tv/usuario",
+    color_distintivo="#9147ff"
+)
+
+print(f"✓ Canal creado: {canal.nombre}")
+</code></pre>
+            </div>
+        </div>
+
+        <!-- Features Preview -->
+        <div class="mt-16">
+            <h2 class="text-2xl font-bold text-gray-800 mb-8">
+                ¿Qué podrás hacer una vez agregues tus canales?
+            </h2>
+            
+            <div class="grid md:grid-cols-3 gap-6 text-left">
+                <!-- Feature 1 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-shadow">
+                    <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-code text-blue-600 text-xl"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 mb-2">Gestión de Comandos</h3>
+                    <p class="text-gray-600 text-sm">
+                        Mantén una lista organizada de todos los comandos del chat por canal.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-shadow">
+                    <div class="bg-red-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-ban text-red-600 text-xl"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 mb-2">Control de Baneos</h3>
+                    <p class="text-gray-600 text-sm">
+                        Registra y monitorea baneos, timeouts y usuarios reincidentes.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-shadow">
+                    <div class="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-sticky-note text-green-600 text-xl"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 mb-2">Notas de Moderación</h3>
+                    <p class="text-gray-600 text-sm">
+                        Documenta incidentes, reglas especiales y recordatorios importantes.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    pre {
+        margin: 0;
+    }
+    
+    code {
+        font-family: 'Courier New', monospace;
+        display: block;
+        white-space: pre;
+    }
+</style>
+{% endblock %}
