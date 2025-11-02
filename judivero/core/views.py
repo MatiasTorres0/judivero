@@ -176,19 +176,11 @@ def perfil_usuario(request, nombre_usuario):
     total_baneos = baneos.count()
     baneos_activos = baneos.filter(activo=True).count()
     
-    # Baneos por tipo
-    por_tipo = baneos.values('tipo_baneo').annotate(total=Count('id'))
-    
-    # Baneos por severidad
-    por_severidad = baneos.values('severidad').annotate(total=Count('id'))
-    
     context = {
         'nombre_usuario': nombre_usuario,
         'baneos': baneos,
         'total_baneos': total_baneos,
         'baneos_activos': baneos_activos,
-        'por_tipo': por_tipo,
-        'por_severidad': por_severidad,
         'canal_actual': canal_actual,
         'canales': canales,
     }
@@ -290,7 +282,7 @@ def generar_reporte_pdf(request, nombre_usuario):
     for idx, baneo in enumerate(baneos, 1):
         # Sección para cada baneo
         baneo_title = Paragraph(
-            f"<b>Infracción #{idx}</b> - {baneo.get_tipo_baneo_display()} "
+            f"<b>Infracción #{idx}</b> "
             f"({'⚠️ ACTIVO' if baneo.activo else '✓ Completado'})",
             styles['Heading3']
         )
@@ -300,8 +292,6 @@ def generar_reporte_pdf(request, nombre_usuario):
         # Detalles del baneo en tabla
         baneo_data = [
             ['Fecha', baneo.fecha_baneo.strftime('%d/%m/%Y %H:%M')],
-            ['Tipo de Sanción', baneo.get_tipo_baneo_display()],
-            ['Severidad', baneo.get_severidad_display()],
             ['Estado', 'ACTIVO' if baneo.activo else 'Completado'],
         ]
         
@@ -328,13 +318,6 @@ def generar_reporte_pdf(request, nombre_usuario):
         elements.append(Paragraph("<b>Motivo:</b>", styles['Normal']))
         motivo_text = Paragraph(baneo.motivo, styles['Justify'])
         elements.append(motivo_text)
-        
-        # Notas adicionales si existen
-        if baneo.notas_adicionales:
-            elements.append(Spacer(1, 8))
-            elements.append(Paragraph("<b>Notas Adicionales:</b>", styles['Normal']))
-            notas_text = Paragraph(baneo.notas_adicionales, styles['Justify'])
-            elements.append(notas_text)
         
         elements.append(Spacer(1, 20))
         

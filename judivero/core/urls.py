@@ -8,4 +8,7 @@ urlpatterns = [
     path('agregar_comando/', views.agregar_comando, name='agregar_comando'),
     path('agregar_baneo/', views.agregar_baneo, name='agregar_baneo'),
     path('cambiar_canal/<int:canal_id>/', views.cambiar_canal, name='cambiar_canal'),
+    path('buscar/', views.buscar_usuario, name='buscar_usuario'),
+    path('perfil/<str:nombre_usuario>/', views.perfil_usuario, name='perfil_usuario'),
+    path('reporte/<str:nombre_usuario>/', views.generar_reporte_pdf, name='generar_reporte_pdf'),
 ]

@@ -1,0 +1,165 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Perfil de {{ nombre_usuario }} - Judivero{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header Section -->
+    <div class="text-center mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+            <i class="fas fa-user-circle text-purple-600 mr-3"></i>
+            Perfil de {{ nombre_usuario }}
+        </h1>
+        <p class="text-xl text-gray-600">
+            Historial completo de moderación
+        </p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Total Baneos -->
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-100 text-sm font-medium mb-1">Total Baneos</p>
+                    <h3 class="text-4xl font-bold">{{ total_baneos }}</h3>
+                </div>
+                <div class="bg-white bg-opacity-20 p-4 rounded-full">
+                    <i class="fas fa-history text-3xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Baneos Activos -->
+        <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-red-100 text-sm font-medium mb-1">Baneos Activos</p>
+                    <h3 class="text-4xl font-bold">{{ baneos_activos }}</h3>
+                </div>
+                <div class="bg-white bg-opacity-20 p-4 rounded-full">
+                    <i class="fas fa-ban text-3xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado -->
+        <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-purple-100 text-sm font-medium mb-1">Estado</p>
+                    <h3 class="text-2xl font-bold">
+                        {% if total_baneos > 1 %}
+                            REINCIDENTE
+                        {% else %}
+                            PRIMERA INFRACCIÓN
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="bg-white bg-opacity-20 p-4 rounded-full">
+                    <i class="fas fa-exclamation-triangle text-3xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de Baneos -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden mb-8">
+        <div class="border-b border-gray-200 px-6 py-4">
+            <h2 class="text-xl font-semibold text-gray-800">
+                <i class="fas fa-history text-purple-600 mr-2"></i>
+                Historial Completo
+            </h2>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                            Fecha
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                            Motivo
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                            Estado
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                            Desbaneo
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                            Acciones
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for baneo in baneos %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ baneo.fecha_baneo|date:"d/m/Y H:i" }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900">
+                            <div class="max-w-md overflow-hidden">
+                                {{ baneo.motivo }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if baneo.activo %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                Activo
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                Completado
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {% if baneo.desbaneo %}
+                                {{ baneo.desbaneo|date:"d/m/Y H:i" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <div class="flex gap-2">
+                                <a href="{% url 'generar_reporte_pdf' nombre_usuario %}" 
+                                   target="_blank"
+                                   class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" 
+                                   title="Descargar PDF">
+                                    <i class="fas fa-file-pdf"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                            <i class="fas fa-check-circle text-4xl mb-3 text-gray-300"></i>
+                            <p class="text-lg font-medium">No hay baneos registrados para este usuario</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="flex justify-between items-center mb-8">
+        <a href="{% url 'inicio' %}" 
+           class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Volver al Inicio
+        </a>
+        <a href="{% url 'agregar_baneo' %}" 
+           class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center">
+            <i class="fas fa-plus mr-2"></i>
+            Nuevo Baneo
+        </a>
+    </div>
+</div>
+{% endblock %}
