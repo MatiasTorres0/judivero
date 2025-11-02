@@ -3,61 +3,109 @@
 {% block title %}Notas - Judivero{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto">
+<div class="max-w-7xl mx-auto">
     <!-- Header Section -->
-    <div class="text-center mb-12">
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            <i class="fas fa-sticky-note text-green-600 mr-3"></i>
-            Mis Notas
-        </h1>
-        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            Organiza y gestiona todas tus notas importantes en un solo lugar
-        </p>
-    </div>
-
-    <!-- Stats Card -->
-    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-green-500 card-hover">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center">
-                <div class="bg-green-100 p-4 rounded-full">
-                    <i class="fas fa-sticky-note text-green-600 text-2xl"></i>
-                </div>
-                <div class="ml-6">
-                    <h3 class="text-3xl font-bold text-gray-800">
-                        {% if notas %}{{ notas.count }}{% else %}0{% endif %}
-                    </h3>
-                    <p class="text-gray-600">Notas registradas</p>
-                </div>
+    <div class="mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h1 class="text-4xl font-bold text-gray-800 mb-2">
+                    <i class="fas fa-sticky-note text-green-600 mr-3"></i>
+                    Mis Notas
+                </h1>
+                <p class="text-gray-600">
+                    Organiza y gestiona toda tu información importante
+                </p>
             </div>
-            <a href="{% url 'agregar_nota' %}" 
-               class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center">
+            <button onclick="abrirModalNota()" 
+               class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center shadow-lg hover:shadow-xl">
                 <i class="fas fa-plus mr-2"></i>
                 Nueva Nota
-            </a>
+            </button>
         </div>
     </div>
 
-    <!-- Notes Grid -->
+    <!-- Search and Filters -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2">
+                <div class="relative">
+                    <input type="text" 
+                           id="buscarNota" 
+                           placeholder="Buscar notas por título o contenido..." 
+                           class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <i class="fas fa-search absolute left-3 top-4 text-gray-400"></i>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="filtrarPorImportancia('todas')" 
+                        class="filtro-btn flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors filtro-activo"
+                        data-filtro="todas">
+                    <i class="fas fa-list mr-2"></i>Todas
+                </button>
+                <button onclick="filtrarPorImportancia('importantes')" 
+                        class="filtro-btn flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-red-50 hover:border-red-300 transition-colors"
+                        data-filtro="importantes">
+                    <i class="fas fa-star mr-2"></i>Importantes
+                </button>
+            </div>
+        </div>
+        
+        <div class="mt-4 flex items-center justify-between">
+            <div class="text-sm text-gray-600">
+                <i class="fas fa-info-circle mr-1"></i>
+                <span id="contadorNotas">{{ notas.count }}</span> nota{{ notas.count|pluralize }}
+            </div>
+            <div class="flex gap-2">
+                <button onclick="cambiarVista('grid')" 
+                        class="vista-btn p-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors vista-activa"
+                        data-vista="grid"
+                        title="Vista de cuadrícula">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button onclick="cambiarVista('lista')" 
+                        class="vista-btn p-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                        data-vista="lista"
+                        title="Vista de lista">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Content -->
     {% if notas %}
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <!-- Vista Grid (por defecto) -->
+    <div id="vistaGrid" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {% for nota in notas %}
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 card-hover">
+        <div class="nota-card bg-white rounded-xl shadow-lg hover:shadow-xl p-6 border border-gray-200 transition-all duration-300 card-hover {% if nota.importante %}border-l-4 border-l-red-500{% endif %}"
+             data-importante="{{ nota.importante|lower }}"
+             data-titulo="{{ nota.titulo|lower }}"
+             data-contenido="{{ nota.nota|lower }}">
             <!-- Note Header -->
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-800">
-                    {% if nota.titulo %}{{ nota.titulo }}{% else %}Nota #{{ forloop.counter }}{% endif %}
-                </h3>
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">
+                        {{ nota.titulo|default:"Sin título" }}
+                    </h3>
+                    {% if nota.etiqueta %}
+                    <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                        <i class="fas fa-tag mr-1"></i>{{ nota.etiqueta }}
+                    </span>
+                    {% endif %}
+                </div>
                 {% if nota.importante %}
-                <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-semibold">
-                    <i class="fas fa-exclamation-circle mr-1"></i>Importante
-                </span>
+                <div class="ml-2">
+                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </span>
+                </div>
                 {% endif %}
             </div>
 
             <!-- Note Content -->
             <div class="mb-4">
-                <p class="text-gray-700 leading-relaxed text-sm">
-                    {{ nota.nota|truncatewords:30 }}
+                <p class="text-gray-700 text-sm leading-relaxed line-clamp-4">
+                    {{ nota.nota }}
                 </p>
             </div>
 
@@ -68,19 +116,65 @@
                     {{ nota.fecha_creacion|date:"d/m/Y" }}
                 </div>
                 
-                <div class="flex space-x-2">
-                    {% if nota.etiqueta %}
-                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                        {{ nota.etiqueta }}
-                    </span>
-                    {% endif %}
-                    
-                    <button onclick="copiarTexto(this)" 
-                            class="text-gray-400 hover:text-blue-600 transition-colors" 
+                <button onclick="copiarNota(this)" 
+                        data-nota="{{ nota.nota }}"
+                        class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all" 
+                        title="Copiar nota completa">
+                    <i class="far fa-copy"></i>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Vista Lista (oculta por defecto) -->
+    <div id="vistaLista" class="hidden space-y-4">
+        {% for nota in notas %}
+        <div class="nota-card bg-white rounded-xl shadow-lg p-6 border border-gray-200 transition-all hover:shadow-xl {% if nota.importante %}border-l-4 border-l-red-500{% endif %}"
+             data-importante="{{ nota.importante|lower }}"
+             data-titulo="{{ nota.titulo|lower }}"
+             data-contenido="{{ nota.nota|lower }}">
+            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                <div class="flex-1">
+                    <div class="flex items-start gap-3 mb-3">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">
+                                {{ nota.titulo|default:"Sin título" }}
+                            </h3>
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                {% if nota.etiqueta %}
+                                <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">
+                                    <i class="fas fa-tag mr-1"></i>{{ nota.etiqueta }}
+                                </span>
+                                {% endif %}
+                                {% if nota.importante %}
+                                <span class="inline-block bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>Importante
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 leading-relaxed mb-3">
+                        {{ nota.nota }}
+                    </p>
+                    <div class="text-sm text-gray-500">
+                        <i class="far fa-calendar mr-1"></i>
+                        Creada: {{ nota.fecha_creacion|date:"d/m/Y H:i" }}
+                        {% if nota.fecha_actualizacion != nota.fecha_creacion %}
+                        <span class="mx-2">•</span>
+                        <i class="fas fa-edit mr-1"></i>
+                        Actualizada: {{ nota.fecha_actualizacion|date:"d/m/Y H:i" }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="flex md:flex-col gap-2">
+                    <button onclick="copiarNota(this)" 
+                            data-nota="{{ nota.nota }}"
+                            class="p-3 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all" 
                             title="Copiar nota">
                         <i class="far fa-copy"></i>
                     </button>
-                    <span class="hidden">{{ nota.nota }}</span>
                 </div>
             </div>
         </div>
@@ -88,20 +182,254 @@
     </div>
     {% else %}
     <!-- Empty State -->
-    <div class="text-center py-16">
-        <div class="bg-gray-100 rounded-full p-6 inline-block mb-6">
-            <i class="fas fa-sticky-note text-gray-400 text-5xl"></i>
+    <div class="text-center py-20">
+        <div class="bg-gray-100 rounded-full p-8 inline-block mb-6">
+            <i class="fas fa-sticky-note text-gray-400 text-6xl"></i>
         </div>
         <h3 class="text-2xl font-semibold text-gray-600 mb-4">No hay notas aún</h3>
         <p class="text-gray-500 mb-8 max-w-md mx-auto">
-            Comienza creando tu primera nota para organizar tus ideas y recordatorios importantes.
+            Comienza creando tu primera nota para organizar tus ideas, recordatorios e información importante.
         </p>
-        <a href="{% url 'agregar_nota' %}" 
-           class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors inline-flex items-center">
+        <button onclick="abrirModalNota()" 
+           class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors inline-flex items-center shadow-lg hover:shadow-xl">
             <i class="fas fa-plus mr-2"></i>
             Crear Primera Nota
-        </a>
+        </button>
     </div>
     {% endif %}
 </div>
+
+<!-- Modal Nueva Nota - CORREGIDO PARA CENTRAR -->
+<div id="modalNota" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Fondo oscuro -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="cerrarModalNota()"></div>
+        
+        <!-- Centrar modal vertical y horizontalmente -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-2xl font-bold text-white flex items-center">
+                        <i class="fas fa-sticky-note mr-3"></i>
+                        Crear Nueva Nota
+                    </h3>
+                    <button onclick="cerrarModalNota()" class="text-white hover:text-gray-200 transition-colors">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <form method="post" action="{% url 'agregar_nota' %}" class="bg-white px-6 py-4 max-h-[70vh] overflow-y-auto">
+                {% csrf_token %}
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Título
+                        </label>
+                        <input type="text" 
+                               name="titulo" 
+                               placeholder="Título de la nota (opcional)"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Contenido <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="nota" 
+                                  required
+                                  rows="6"
+                                  placeholder="Escribe el contenido de tu nota aquí..."
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-y"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Etiqueta
+                        </label>
+                        <input type="text" 
+                               name="etiqueta" 
+                               placeholder="Ej: trabajo, personal, ideas..."
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <input type="checkbox" 
+                               name="importante" 
+                               id="importante"
+                               class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                        <label for="importante" class="ml-2 text-sm text-gray-700 cursor-pointer">
+                            <i class="fas fa-star text-yellow-500 mr-1"></i>
+                            Marcar como importante
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 px-6 py-4 mt-6 flex justify-end space-x-3">
+                    <button type="button" 
+                            onclick="cerrarModalNota()"
+                            class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            class="px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-lg">
+                        <i class="fas fa-save mr-2"></i>
+                        Guardar Nota
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .line-clamp-4 {
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .filtro-activo {
+        background-color: #10b981;
+        color: white;
+        border-color: #10b981;
+    }
+    
+    .filtro-activo:hover {
+        background-color: #059669;
+        border-color: #059669;
+    }
+    
+    .vista-activa {
+        background-color: #e5e7eb;
+        color: #374151;
+    }
+</style>
+
+<script>
+    // Gestión de Modales - Versión corregida
+    function abrirModalNota() {
+        document.getElementById('modalNota').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function cerrarModalNota() {
+        document.getElementById('modalNota').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Cerrar modales con tecla ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            cerrarModalNota();
+        }
+    });
+    
+    // Función para copiar notas
+    function copiarNota(boton) {
+        const nota = boton.getAttribute('data-nota');
+        
+        navigator.clipboard.writeText(nota).then(() => {
+            const icono = boton.querySelector('i');
+            const iconoOriginal = icono.className;
+            
+            // Cambiar ícono a check
+            icono.className = 'fas fa-check text-green-500';
+            boton.classList.add('bg-green-50');
+            
+            // Restaurar después de 2 segundos
+            setTimeout(() => {
+                icono.className = iconoOriginal;
+                boton.classList.remove('bg-green-50');
+            }, 2000);
+        }).catch(err => {
+            console.error('Error al copiar: ', err);
+        });
+    }
+    
+    // Búsqueda en tiempo real
+    document.getElementById('buscarNota').addEventListener('input', function(e) {
+        const busqueda = e.target.value.toLowerCase();
+        const notas = document.querySelectorAll('.nota-card');
+        let visibles = 0;
+        
+        notas.forEach(nota => {
+            const titulo = nota.getAttribute('data-titulo');
+            const contenido = nota.getAttribute('data-contenido');
+            
+            if (titulo.includes(busqueda) || contenido.includes(busqueda)) {
+                nota.style.display = '';
+                visibles++;
+            } else {
+                nota.style.display = 'none';
+            }
+        });
+        
+        actualizarContador(visibles);
+    });
+    
+    // Filtrar por importancia
+    function filtrarPorImportancia(filtro) {
+        const notas = document.querySelectorAll('.nota-card');
+        const botones = document.querySelectorAll('.filtro-btn');
+        let visibles = 0;
+        
+        botones.forEach(btn => {
+            btn.classList.remove('filtro-activo');
+            if (btn.getAttribute('data-filtro') === filtro) {
+                btn.classList.add('filtro-activo');
+            }
+        });
+        
+        notas.forEach(nota => {
+            const esImportante = nota.getAttribute('data-importante') === 'true';
+            
+            if (filtro === 'todas' || (filtro === 'importantes' && esImportante)) {
+                nota.style.display = '';
+                visibles++;
+            } else {
+                nota.style.display = 'none';
+            }
+        });
+        
+        actualizarContador(visibles);
+    }
+    
+    // Cambiar vista
+    function cambiarVista(vista) {
+        const vistaGrid = document.getElementById('vistaGrid');
+        const vistaLista = document.getElementById('vistaLista');
+        const botones = document.querySelectorAll('.vista-btn');
+        
+        botones.forEach(btn => {
+            btn.classList.remove('vista-activa');
+            if (btn.getAttribute('data-vista') === vista) {
+                btn.classList.add('vista-activa');
+            }
+        });
+        
+        if (vista === 'grid') {
+            vistaGrid.classList.remove('hidden');
+            vistaLista.classList.add('hidden');
+        } else {
+            vistaGrid.classList.add('hidden');
+            vistaLista.classList.remove('hidden');
+        }
+        
+        localStorage.setItem('vistaNotas', vista);
+    }
+    
+    // Actualizar contador
+    function actualizarContador(cantidad) {
+        document.getElementById('contadorNotas').textContent = cantidad;
+    }
+    
+    // Restaurar vista preferida
+    document.addEventListener('DOMContentLoaded', function() {
+        const vistaPreferida = localStorage.getItem('vistaNotas') || 'grid';
+        cambiarVista(vistaPreferida);
+    });
+</script>
 {% endblock %}

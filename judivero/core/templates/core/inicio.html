@@ -3,200 +3,565 @@
 {% block title %}Inicio - Judivero{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto">
+<div class="max-w-7xl mx-auto">
     <!-- Header Section -->
-    <div class="text-center mb-12">
+    <div class="text-center mb-8">
         <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
             <i class="fas fa-terminal text-purple-600 mr-3"></i>
-            Sistema de Gestión Judivero
+            Panel de Control Judivero
         </h1>
-        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            Administra comandos, notas y baneos de manera organizada y eficiente
+        <p class="text-xl text-gray-600">
+            Gestión centralizada de comandos y baneos
         </p>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        <div class="bg-white rounded-xl shadow-lg p-6 card-hover border-l-4 border-blue-500">
-            <div class="flex items-center">
-                <div class="bg-blue-100 p-3 rounded-full">
-                    <i class="fas fa-code text-blue-600 text-xl"></i>
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-100 text-sm font-medium mb-1">Total Comandos</p>
+                    <h3 class="text-4xl font-bold">{{ comandos.count }}</h3>
                 </div>
-                <div class="ml-4">
-                    <h3 class="text-2xl font-bold text-gray-800">{{ comandos.count }}</h3>
-                    <p class="text-gray-600">Comandos</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="bg-white rounded-xl shadow-lg p-6 card-hover border-l-4 border-green-500">
-            <div class="flex items-center">
-                <div class="bg-green-100 p-3 rounded-full">
-                    <i class="fas fa-sticky-note text-green-600 text-xl"></i>
-                </div>
-                <div class="ml-4">
-                    <h3 class="text-2xl font-bold text-gray-800">0</h3>
-                    <p class="text-gray-600">Notas</p>
+                <div class="bg-white bg-opacity-20 p-4 rounded-full">
+                    <i class="fas fa-code text-3xl"></i>
                 </div>
             </div>
         </div>
         
-        <div class="bg-white rounded-xl shadow-lg p-6 card-hover border-l-4 border-red-500">
-            <div class="flex items-center">
-                <div class="bg-red-100 p-3 rounded-full">
-                    <i class="fas fa-ban text-red-600 text-xl"></i>
+        <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-red-100 text-sm font-medium mb-1">Total Baneos</p>
+                    <h3 class="text-4xl font-bold">{{ baneos.count }}</h3>
                 </div>
-                <div class="ml-4">
-                    <h3 class="text-2xl font-bold text-gray-800">{{ baneos.count }}</h3>
-                    <p class="text-gray-600">Baneos</p>
+                <div class="bg-white bg-opacity-20 p-4 rounded-full">
+                    <i class="fas fa-ban text-3xl"></i>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Sección Comandos -->
-    <section class="mb-12">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-3xl font-bold text-gray-800 flex items-center">
-                <i class="fas fa-code mr-3 text-blue-600"></i>
-                Comandos
-            </h2>
-            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
-                {{ comandos.count }} total
-            </span>
+    <!-- Tabs Navigation -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+        <div class="border-b border-gray-200">
+            <nav class="flex -mb-px">
+                <button onclick="cambiarTab('comandos')" 
+                        id="tab-comandos" 
+                        class="tab-button tab-active flex-1 py-4 px-6 text-center font-semibold transition-all">
+                    <i class="fas fa-code mr-2"></i>
+                    Comandos
+                    <span class="ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">{{ comandos.count }}</span>
+                </button>
+                <button onclick="cambiarTab('baneos')" 
+                        id="tab-baneos" 
+                        class="tab-button flex-1 py-4 px-6 text-center font-semibold transition-all">
+                    <i class="fas fa-ban mr-2"></i>
+                    Baneos
+                    <span class="ml-2 bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">{{ baneos.count }}</span>
+                </button>
+            </nav>
         </div>
-        
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                Comando
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                Juego/Significado
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                Nivel
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% for comando in comandos %}
-                        <tr class="hover:bg-gray-50 transition-colors duration-200">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <span class="text-sm font-medium text-gray-900 bg-gray-100 px-3 py-1 rounded">
-                                        {{ comando.nombre }}
-                                    </span>
-                                    <button onclick="copiarTexto(this)" 
-                                            class="ml-2 p-2 text-gray-400 hover:text-blue-600 transition-colors rounded-full hover:bg-blue-50" 
-                                            title="Copiar comando">
-                                        <i class="far fa-copy text-sm"></i>
-                                    </button>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-normal">
-                                <span class="text-sm text-gray-700">
-                                    {{ comando.juego_o_significado }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
-                                    {% if comando.nivel_minimo <= 1 %}
-                                        bg-green-100 text-green-800
-                                    {% elif comando.nivel_minimo <= 3 %}
-                                        bg-yellow-100 text-yellow-800
-                                    {% else %}
-                                        bg-red-100 text-red-800
-                                    {% endif %}
-                                ">
-                                    Nivel {{ comando.nivel_minimo }}
-                                </span>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="3" class="px-6 py-8 text-center text-gray-500">
-                                <i class="fas fa-inbox text-3xl mb-2 text-gray-300"></i>
-                                <p>No hay comandos registrados</p>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
 
-    <!-- Sección Baneos -->
-    <section>
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-3xl font-bold text-gray-800 flex items-center">
-                <i class="fas fa-ban mr-3 text-red-600"></i>
-                Baneos
-            </h2>
-            <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">
-                {{ baneos.count }} total
-            </span>
-        </div>
-        
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                Usuario
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                Motivo
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                Fecha Baneo
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                Fecha Desbaneo
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% for baneo in baneos %}
-                        <tr class="hover:bg-gray-50 transition-colors duration-200">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm font-medium text-gray-900">
-                                    {{ baneo.nombre_usuario }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-normal">
-                                <span class="text-sm text-gray-700">
-                                    {{ baneo.motivo }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm text-gray-600">
-                                    {{ baneo.fecha_baneo|date:"d/m/Y" }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm text-gray-600">
-                                    {{ baneo.fecha_desbaneo|date:"d/m/Y" }}
-                                </span>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="px-6 py-8 text-center text-gray-500">
-                                <i class="fas fa-check-circle text-3xl mb-2 text-gray-300"></i>
-                                <p>No hay baneos registrados</p>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <!-- Tab Content: Comandos -->
+        <div id="content-comandos" class="tab-content">
+            <div class="p-6">
+                <!-- Buscador y Filtros -->
+                <div class="flex flex-col md:flex-row gap-4 mb-6">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <input type="text" 
+                                   id="buscarComando" 
+                                   placeholder="Buscar comando por nombre o descripción..." 
+                                   class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <i class="fas fa-search absolute left-3 top-4 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <button onclick="abrirModalComando()" 
+                       class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center whitespace-nowrap shadow-lg hover:shadow-xl">
+                        <i class="fas fa-plus mr-2"></i>
+                        Nuevo Comando
+                    </button>
+                </div>
+
+                <!-- Tabla de Comandos -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Comando
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Descripción
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Nivel
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider w-24">
+                                    Acción
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="tablaComandos">
+                            {% for comando in comandos %}
+                            <tr class="hover:bg-gray-50 transition-colors comando-row">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <span class="comando-nombre text-sm font-mono font-semibold text-gray-900 bg-gray-100 px-3 py-1 rounded">
+                                            {{ comando.nombre }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="comando-descripcion text-sm text-gray-700">
+                                        {{ comando.juego_o_significado }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
+                                        {% if comando.nivel_minimo == 'EVERYONE' %}
+                                            bg-green-100 text-green-800
+                                        {% elif comando.nivel_minimo == 'VIPS' %}
+                                            bg-blue-100 text-blue-800
+                                        {% elif comando.nivel_minimo == 'MODS' %}
+                                            bg-yellow-100 text-yellow-800
+                                        {% elif comando.nivel_minimo == 'SUPERMODS' %}
+                                            bg-orange-100 text-orange-800
+                                        {% else %}
+                                            bg-red-100 text-red-800
+                                        {% endif %}
+                                    ">
+                                        {{ comando.get_nivel_minimo_display }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <button onclick="copiarComando(this)" 
+                                            data-comando="{{ comando.nombre }}"
+                                            class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" 
+                                            title="Copiar comando">
+                                        <i class="far fa-copy"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                                    <i class="fas fa-inbox text-4xl mb-3 text-gray-300"></i>
+                                    <p class="text-lg font-medium">No hay comandos registrados</p>
+                                    <button onclick="abrirModalComando()" class="text-blue-600 hover:text-blue-700 mt-2 inline-block">
+                                        Agregar el primero
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </section>
+
+        <!-- Tab Content: Baneos -->
+        <div id="content-baneos" class="tab-content hidden">
+            <div class="p-6">
+                <!-- Buscador y Filtros -->
+                <div class="flex flex-col md:flex-row gap-4 mb-6">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <input type="text" 
+                                   id="buscarBaneo" 
+                                   placeholder="Buscar por nombre de usuario..." 
+                                   class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            <i class="fas fa-search absolute left-3 top-4 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <button onclick="abrirModalBaneo()" 
+                       class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center whitespace-nowrap shadow-lg hover:shadow-xl">
+                        <i class="fas fa-plus mr-2"></i>
+                        Nuevo Baneo
+                    </button>
+                </div>
+
+                <!-- Tabla de Baneos -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Usuario
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Motivo
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Fecha Baneo
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Desbaneo
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Estado
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="tablaBaneos">
+                            {% for baneo in baneos %}
+                            <tr class="hover:bg-gray-50 transition-colors baneo-row">
+                                <td class="px-6 py-4">
+                                    <span class="baneo-usuario text-sm font-semibold text-gray-900">
+                                        {{ baneo.nombre_usuario }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 max-w-md">
+                                    <span class="baneo-motivo text-sm text-gray-700 line-clamp-2">
+                                        {{ baneo.motivo }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="text-sm text-gray-600">
+                                        <i class="far fa-calendar mr-1"></i>
+                                        {{ baneo.fecha_baneo|date:"d/m/Y H:i" }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if baneo.desbaneo %}
+                                    <span class="text-sm text-gray-600">
+                                        <i class="far fa-clock mr-1"></i>
+                                        {{ baneo.desbaneo|date:"d/m/Y H:i" }}
+                                    </span>
+                                    {% else %}
+                                    <span class="text-sm text-red-600 font-semibold">
+                                        <i class="fas fa-infinity mr-1"></i>
+                                        Permanente
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if baneo.activo %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <i class="fas fa-circle text-red-600 mr-1 text-xs"></i>
+                                        Activo
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Inactivo
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                                    <i class="fas fa-check-circle text-4xl mb-3 text-gray-300"></i>
+                                    <p class="text-lg font-medium">No hay baneos registrados</p>
+                                    <button onclick="abrirModalBaneo()" class="text-red-600 hover:text-red-700 mt-2 inline-block">
+                                        Agregar el primero
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Modal Comando - CORREGIDO PARA CENTRAR -->
+<div id="modalComando" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Fondo oscuro -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="cerrarModalComando()"></div>
+        
+        <!-- Centrar modal vertical y horizontalmente -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-2xl font-bold text-white flex items-center">
+                        <i class="fas fa-code mr-3"></i>
+                        Agregar Nuevo Comando
+                    </h3>
+                    <button onclick="cerrarModalComando()" class="text-white hover:text-gray-200 transition-colors">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <form method="post" action="{% url 'agregar_comando' %}" class="bg-white px-6 py-4 max-h-[70vh] overflow-y-auto">
+                {% csrf_token %}
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Nombre del Comando <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               name="nombre" 
+                               required
+                               placeholder="!comando"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Juego o Significado <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               name="juego_o_significado" 
+                               required
+                               placeholder="Descripción del comando"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Nivel Mínimo Requerido <span class="text-red-500">*</span>
+                        </label>
+                        <select name="nivel_minimo" 
+                                required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="EVERYONE">Everyone</option>
+                            <option value="VIPS">VIPs</option>
+                            <option value="MODS">Mods</option>
+                            <option value="SUPERMODS">SuperMods</option>
+                            <option value="STREAMER">Streamer</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 px-6 py-4 mt-6 flex justify-end space-x-3">
+                    <button type="button" 
+                            onclick="cerrarModalComando()"
+                            class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg">
+                        <i class="fas fa-save mr-2"></i>
+                        Guardar Comando
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Baneo - CORREGIDO PARA CENTRAR -->
+<div id="modalBaneo" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Fondo oscuro -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="cerrarModalBaneo()"></div>
+        
+        <!-- Centrar modal vertical y horizontalmente -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-2xl font-bold text-white flex items-center">
+                        <i class="fas fa-ban mr-3"></i>
+                        Registrar Nuevo Baneo
+                    </h3>
+                    <button onclick="cerrarModalBaneo()" class="text-white hover:text-gray-200 transition-colors">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <form method="post" action="{% url 'agregar_baneo' %}" class="bg-white px-6 py-4 max-h-[70vh] overflow-y-auto">
+                {% csrf_token %}
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Nombre de Usuario <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               name="nombre_usuario" 
+                               required
+                               placeholder="Usuario a banear"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Motivo del Baneo <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="motivo" 
+                                  required
+                                  rows="3"
+                                  placeholder="Describe el motivo del baneo..."
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Fecha de Desbaneo (Opcional)
+                        </label>
+                        <input type="datetime-local" 
+                               name="fecha_desbaneo" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 px-6 py-4 mt-6 flex justify-end space-x-3">
+                    <button type="button" 
+                            onclick="cerrarModalBaneo()"
+                            class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            class="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors shadow-lg">
+                        <i class="fas fa-save mr-2"></i>
+                        Guardar Baneo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .tab-button {
+        color: #6b7280;
+        border-bottom: 3px solid transparent;
+    }
+    
+    .tab-button:hover {
+        color: #374151;
+        background-color: #f9fafb;
+    }
+    
+    .tab-active {
+        color: #2563eb;
+        border-bottom-color: #2563eb;
+        background-color: #eff6ff;
+    }
+    
+    #tab-baneos.tab-active {
+        color: #dc2626;
+        border-bottom-color: #dc2626;
+        background-color: #fef2f2;
+    }
+    
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+
+<script>
+    // Sistema de Tabs
+    function cambiarTab(tab) {
+        // Ocultar todos los contenidos de tabs
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        
+        // Remover clase activa de todos los botones
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('tab-active');
+        });
+        
+        // Mostrar el contenido del tab seleccionado y activar el botón
+        document.getElementById('content-' + tab).classList.remove('hidden');
+        document.getElementById('tab-' + tab).classList.add('tab-active');
+        
+        // Guardar en localStorage
+        localStorage.setItem('activeTab', tab);
+    }
+    
+    // Inicializar al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        const activeTab = localStorage.getItem('activeTab') || 'comandos';
+        cambiarTab(activeTab);
+    });
+    
+    // Gestión de Modales - Versión simplificada y corregida
+    function abrirModalComando() {
+        document.getElementById('modalComando').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function cerrarModalComando() {
+        document.getElementById('modalComando').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+    
+    function abrirModalBaneo() {
+        document.getElementById('modalBaneo').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function cerrarModalBaneo() {
+        document.getElementById('modalBaneo').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Cerrar modales con tecla ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            cerrarModalComando();
+            cerrarModalBaneo();
+        }
+    });
+    
+    // Función para copiar comandos
+    function copiarComando(boton) {
+        const comando = boton.getAttribute('data-comando');
+        
+        navigator.clipboard.writeText(comando).then(() => {
+            const icono = boton.querySelector('i');
+            const iconoOriginal = icono.className;
+            
+            // Cambiar ícono a check
+            icono.className = 'fas fa-check text-green-500';
+            boton.classList.add('bg-green-50');
+            
+            // Restaurar después de 2 segundos
+            setTimeout(() => {
+                icono.className = iconoOriginal;
+                boton.classList.remove('bg-green-50');
+            }, 2000);
+        }).catch(err => {
+            console.error('Error al copiar: ', err);
+        });
+    }
+    
+    // Búsqueda en tiempo real para comandos
+    document.getElementById('buscarComando').addEventListener('input', function(e) {
+        const busqueda = e.target.value.toLowerCase();
+        const filas = document.querySelectorAll('#tablaComandos .comando-row');
+        
+        filas.forEach(fila => {
+            const nombre = fila.querySelector('.comando-nombre').textContent.toLowerCase();
+            const descripcion = fila.querySelector('.comando-descripcion').textContent.toLowerCase();
+            
+            if (nombre.includes(busqueda) || descripcion.includes(busqueda)) {
+                fila.style.display = '';
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+    });
+    
+    // Búsqueda en tiempo real para baneos
+    document.getElementById('buscarBaneo').addEventListener('input', function(e) {
+        const busqueda = e.target.value.toLowerCase();
+        const filas = document.querySelectorAll('#tablaBaneos .baneo-row');
+        
+        filas.forEach(fila => {
+            const usuario = fila.querySelector('.baneo-usuario').textContent.toLowerCase();
+            const motivo = fila.querySelector('.baneo-motivo').textContent.toLowerCase();
+            
+            if (usuario.includes(busqueda) || motivo.includes(busqueda)) {
+                fila.style.display = '';
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+    });
+</script>
 {% endblock %}

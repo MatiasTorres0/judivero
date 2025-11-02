@@ -1,8 +1,8 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
-# Create your models here.
 class Comando(models.Model):
     NIVEL = [
         ('EVERYONE', 'Everyone'),
@@ -37,13 +37,6 @@ class Nota(models.Model):
         verbose_name = 'Nota'
         verbose_name_plural = 'Notas'
 
-    def save(self, *args, **kwargs):
-        if not self.pk and not self.user_id:
-            # Si estamos en un contexto con request, podemos obtener el usuario actual
-            # Esto debe manejarse en la vista, no aquí
-            pass
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return f"{self.titulo or 'Sin título'} - {self.nota[:50]}{'...' if len(self.nota) > 50 else ''} ({self.fecha_creacion.strftime('%d/%m/%Y')})"
 
@@ -61,6 +54,11 @@ class Baneos(models.Model):
     desbaneo = models.DateTimeField(null=True, blank=True)    
     activo = models.BooleanField(default=True)
 
+    class Meta:
+        verbose_name = 'Baneo'
+        verbose_name_plural = 'Baneos'
+        ordering = ['-fecha_baneo']
+
     def esta_baneado(self):
         # Si hay fecha de desbaneo y ya pasó, el baneo está inactivo
         if self.desbaneo and self.desbaneo <= timezone.now():
@@ -74,3 +72,6 @@ class Baneos(models.Model):
         self.activo = False
         self.save(update_fields=['desbaneo', 'activo'])
 
+    def __str__(self):
+        estado = "Activo" if self.activo else "Inactivo"
+        return f"{self.nombre_usuario} - {estado} ({self.fecha_baneo.strftime('%d/%m/%Y')})"

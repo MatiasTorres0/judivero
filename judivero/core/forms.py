@@ -6,7 +6,6 @@ class NotaForm(forms.ModelForm):
     class Meta:
         model = Nota
         fields = ['titulo', 'nota', 'etiqueta', 'importante']
-        exclude = ['user', 'fecha_creacion', 'fecha_actualizacion']
         widgets = {
             'titulo': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -25,43 +24,42 @@ class NotaForm(forms.ModelForm):
                 'class': 'form-check-input'
             })
         }
+        labels = {
+            'titulo': 'Título',
+            'nota': 'Contenido',
+            'etiqueta': 'Etiqueta',
+            'importante': 'Marcar como importante'
+        }
 
 
 class ComandoForm(forms.ModelForm):
     class Meta:
         model = Comando
-        fields = '__all__'
+        fields = ['nombre', 'juego_o_significado', 'nivel_minimo']
         widgets = {
             'nombre': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Nombre del comando'
+                'placeholder': 'Nombre del comando (ej: !hola)'
             }),
-            'descripcion': forms.Textarea(attrs={
+            'juego_o_significado': forms.TextInput(attrs={
                 'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Describe qué hace este comando...'
+                'placeholder': 'Juego o descripción del comando'
             }),
-            'codigo': forms.Textarea(attrs={
-                'class': 'form-control font-monospace',
-                'rows': 6,
-                'placeholder': 'Pega aquí el código del comando...'
-            }),
-            'categoria': forms.Select(attrs={
-                'class': 'form-select'
-            }),
-            'fecha_creacion': forms.DateTimeInput(attrs={
-                'class': 'form-control',
-                'type': 'datetime-local'
-            }, format='%Y-%m-%dT%H:%M'),
-            'autor': forms.Select(attrs={
+            'nivel_minimo': forms.Select(attrs={
                 'class': 'form-select'
             })
         }
+        labels = {
+            'nombre': 'Nombre del Comando',
+            'juego_o_significado': 'Juego o Significado',
+            'nivel_minimo': 'Nivel Mínimo Requerido'
+        }
+
 
 class BaneoForm(forms.ModelForm):
     class Meta:
         model = Baneos
-        fields = '__all__'
+        fields = ['nombre_usuario', 'motivo', 'desbaneo']
         widgets = {
             'nombre_usuario': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -79,7 +77,7 @@ class BaneoForm(forms.ModelForm):
         }
         labels = {
             'nombre_usuario': 'Nombre de usuario',
-            'motivo': 'Motivo',
+            'motivo': 'Motivo del baneo',
             'desbaneo': 'Fecha de desbaneo',
         }
         help_texts = {
