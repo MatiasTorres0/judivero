@@ -172,6 +172,11 @@
                 </div>
             </div>
         </div>
+        <a href="{% url 'buscar_usuario' %}" 
+   class="nav-link {% if '/buscar' in request.path %}nav-link-active{% endif %}">
+    <i class="fas fa-search nav-icon"></i>
+    <span>Buscar</span>
+</a>
     </nav>
 
     <!-- Canal Actual Badge (mobile) -->
