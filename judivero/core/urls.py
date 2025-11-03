@@ -11,4 +11,6 @@ urlpatterns = [
     path('buscar/', views.buscar_usuario, name='buscar_usuario'),
     path('perfil/<str:nombre_usuario>/', views.perfil_usuario, name='perfil_usuario'),
     path('reporte/<str:nombre_usuario>/', views.generar_reporte_pdf, name='generar_reporte_pdf'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
 ]

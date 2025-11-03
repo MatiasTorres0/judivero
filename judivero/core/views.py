@@ -10,11 +10,12 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 from io import BytesIO
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
 
 from .models import Comando, Nota, Baneos, CanalTwitch
 from .forms import ComandoForm, NotaForm, BaneoForm
 
-
+@login_required
 def get_canal_actual(request):
     """Obtiene el canal actual de la sesión o el primero disponible"""
     canal_id = request.session.get('canal_actual_id')
@@ -30,7 +31,7 @@ def get_canal_actual(request):
         request.session['canal_actual_id'] = canal.id
     return canal
 
-
+@login_required
 def cambiar_canal(request, canal_id):
     """Vista para cambiar de canal"""
     canal = get_object_or_404(CanalTwitch, id=canal_id, activo=True)
@@ -38,7 +39,7 @@ def cambiar_canal(request, canal_id):
     next_url = request.GET.get('next', 'inicio')
     return redirect(next_url)
 
-
+@login_required
 def inicio(request):
     canal_actual = get_canal_actual(request)
     canales = CanalTwitch.objects.filter(activo=True)
@@ -57,7 +58,7 @@ def inicio(request):
     }
     return render(request, 'core/inicio.html', context)
 
-
+@login_required
 def notas_view(request):
     canal_actual = get_canal_actual(request)
     canales = CanalTwitch.objects.filter(activo=True)
@@ -74,7 +75,7 @@ def notas_view(request):
     }
     return render(request, 'core/notas.html', context)
 
-
+@login_required
 def agregar_nota(request):
     canal_actual = get_canal_actual(request)
     
@@ -98,7 +99,7 @@ def agregar_nota(request):
         'canal_actual': canal_actual
     })
 
-
+@login_required
 def agregar_comando(request):
     canal_actual = get_canal_actual(request)
     
@@ -120,7 +121,7 @@ def agregar_comando(request):
         'canal_actual': canal_actual
     })
 
-
+@login_required
 def agregar_baneo(request):
     canal_actual = get_canal_actual(request)
     
@@ -157,7 +158,7 @@ def agregar_baneo(request):
 
 
 # ==================== NUEVAS VISTAS PARA REPORTES ====================
-
+@login_required
 def perfil_usuario(request, nombre_usuario):
     """Vista del perfil completo de un usuario con su historial"""
     canal_actual = get_canal_actual(request)
@@ -187,7 +188,7 @@ def perfil_usuario(request, nombre_usuario):
     
     return render(request, 'core/perfil_usuario.html', context)
 
-
+@login_required
 def generar_reporte_pdf(request, nombre_usuario):
     """Genera un PDF con el historial completo de baneos de un usuario"""
     canal_actual = get_canal_actual(request)
@@ -356,7 +357,7 @@ def generar_reporte_pdf(request, nombre_usuario):
     
     return response
 
-
+@login_required
 def buscar_usuario(request):
     """Vista para buscar un usuario en todos los canales"""
     canal_actual = get_canal_actual(request)
@@ -400,3 +401,19 @@ def buscar_usuario(request):
     }
     
     return render(request, 'core/buscar_usuario.html', context)
+
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('inicio')
+    else:
+        form = AuthenticationForm()
+    
+    return render(request, 'registration/login.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
