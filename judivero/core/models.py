@@ -122,11 +122,13 @@ class Baneos(models.Model):
     motivo = models.TextField()
     desbaneo = models.DateTimeField(null=True, blank=True)    
     activo = models.BooleanField(default=True)
-    imagen = models.FileField(
-        upload_to='carrucel_inicio',
+    # Por esta:
+    imagen = models.ImageField(
+        upload_to='baneos/imagenes/',
         validators=[FileExtensionValidator(['svg', 'png', 'jpg', 'jpeg'])],
         blank=True,
-        null=True
+        null=True,
+        help_text="Imagen relacionada con el baneo"
     )
     class Meta:
         verbose_name = 'Baneo'
