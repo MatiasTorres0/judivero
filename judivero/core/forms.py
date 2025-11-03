@@ -72,13 +72,14 @@ class BaneoForm(forms.ModelForm):
             }),
             'desbaneo': forms.DateTimeInput(attrs={
                 'class': 'form-control',
-                'type': 'datetime-local'
-            }, format='%Y-%m-%dT%H:%M'),
+                'type': 'datetime-local',
+                'placeholder': 'dd-mm-aaaa --:--'
+            }),
         }
         labels = {
             'nombre_usuario': 'Nombre de usuario',
             'motivo': 'Motivo del baneo',
-            'desbaneo': 'Fecha de desbaneo',
+            'desbaneo': 'Fecha de desbaneo (Opcional)',
         }
         help_texts = {
             'desbaneo': 'Deja en blanco si el baneo es permanente.',

@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-
+from django.core.validators import FileExtensionValidator
 # Modelo para Canales de Twitch donde eres moderador
 class CanalTwitch(models.Model):
     nombre = models.CharField(max_length=100, unique=True, help_text="Nombre del canal de Twitch")
@@ -122,7 +122,12 @@ class Baneos(models.Model):
     motivo = models.TextField()
     desbaneo = models.DateTimeField(null=True, blank=True)    
     activo = models.BooleanField(default=True)
-
+    imagen = models.FileField(
+        upload_to='carrucel_inicio',
+        validators=[FileExtensionValidator(['svg', 'png', 'jpg', 'jpeg'])],
+        blank=True,
+        null=True
+    )
     class Meta:
         verbose_name = 'Baneo'
         verbose_name_plural = 'Baneos'

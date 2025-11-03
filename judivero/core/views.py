@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from django.db.models import Count, Q
+from django.contrib.auth import login, logout
+from django.contrib.auth.forms import AuthenticationForm
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -78,6 +80,7 @@ def notas_view(request):
 @login_required
 def agregar_nota(request):
     canal_actual = get_canal_actual(request)
+    canales = CanalTwitch.objects.filter(activo=True)
     
     if not canal_actual:
         return redirect('inicio')
@@ -96,12 +99,14 @@ def agregar_nota(request):
     
     return render(request, 'core/agregar_nota.html', {
         'form': form,
-        'canal_actual': canal_actual
+        'canal_actual': canal_actual,
+        'canales': canales,
     })
 
 @login_required
 def agregar_comando(request):
     canal_actual = get_canal_actual(request)
+    canales = CanalTwitch.objects.filter(activo=True)
     
     if not canal_actual:
         return redirect('inicio')
@@ -118,12 +123,14 @@ def agregar_comando(request):
     
     return render(request, 'core/agregar_comandos.html', {
         'form': form,
-        'canal_actual': canal_actual
+        'canal_actual': canal_actual,
+        'canales': canales,
     })
 
 @login_required
 def agregar_baneo(request):
     canal_actual = get_canal_actual(request)
+    canales = CanalTwitch.objects.filter(activo=True)
     
     if not canal_actual:
         return redirect('inicio')
@@ -134,16 +141,6 @@ def agregar_baneo(request):
             baneo = form.save(commit=False)
             baneo.canal = canal_actual
             
-            # Verificar si es reincidente
-            baneos_previos = Baneos.objects.filter(
-                canal=canal_actual,
-                nombre_usuario=baneo.nombre_usuario
-            ).exclude(id=baneo.id if baneo.id else None)
-            
-            if baneos_previos.exists():
-                baneo.es_reincidente = True
-                baneo.numero_infracciones = baneos_previos.count() + 1
-            
             if request.user.is_authenticated:
                 baneo.user = request.user
             baneo.save()
@@ -153,7 +150,8 @@ def agregar_baneo(request):
     
     return render(request, 'core/agregar_baneo.html', {
         'form': form,
-        'canal_actual': canal_actual
+        'canal_actual': canal_actual,
+        'canales': canales,
     })
 
 
