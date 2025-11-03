@@ -1,5 +1,24 @@
 from django.contrib import admin
+from django import forms
 from .models import Comando, Nota, Baneos, CanalTwitch
+
+# Form personalizado para Baneos en el admin
+class BaneosAdminForm(forms.ModelForm):
+    class Meta:
+        model = Baneos
+        fields = '__all__'
+        widgets = {
+            'desbaneo': forms.DateTimeInput(
+                attrs={'type': 'datetime-local'},
+                format='%Y-%m-%dT%H:%M'
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Configurar el formato del campo desbaneo si tiene valor
+        if self.instance and self.instance.desbaneo:
+            self.initial['desbaneo'] = self.instance.desbaneo.strftime('%Y-%m-%dT%H:%M')
 
 @admin.register(CanalTwitch)
 class CanalTwitchAdmin(admin.ModelAdmin):
@@ -66,7 +85,8 @@ class NotaAdmin(admin.ModelAdmin):
 
 @admin.register(Baneos)
 class BaneosAdmin(admin.ModelAdmin):
-    list_display = ['nombre_usuario', 'canal', 'activo', 'fecha_baneo']
+    form = BaneosAdminForm  # Usar el formulario personalizado
+    list_display = ['nombre_usuario', 'canal', 'activo', 'fecha_baneo', 'desbaneo']
     list_filter = ['canal', 'activo', 'fecha_baneo']
     search_fields = ['nombre_usuario', 'motivo']
     ordering = ['-fecha_baneo']
@@ -75,15 +95,24 @@ class BaneosAdmin(admin.ModelAdmin):
         ('Usuario y Canal', {
             'fields': ('canal', 'nombre_usuario', 'user')
         }),
-        ('Detalles', {
-            'fields': ('motivo', 'activo', 'fecha_baneo', 'desbaneo')
+        ('Detalles del Baneo', {
+            'fields': ('motivo', 'activo')
+        }),
+        ('Fechas', {
+            'fields': ('fecha_baneo', 'desbaneo'),
+            'description': 'La fecha de baneo se registra automáticamente. El desbaneo es opcional.'
         }),
     )
     readonly_fields = ['fecha_baneo']
     
-    actions = ['desactivar_baneos']
+    actions = ['desactivar_baneos', 'activar_baneos']
     
     def desactivar_baneos(self, request, queryset):
         queryset.update(activo=False)
         self.message_user(request, f'{queryset.count()} baneo(s) desactivado(s).')
     desactivar_baneos.short_description = "Desactivar baneos seleccionados"
+    
+    def activar_baneos(self, request, queryset):
+        queryset.update(activo=True)
+        self.message_user(request, f'{queryset.count()} baneo(s) activado(s).')
+    activar_baneos.short_description = "Activar baneos seleccionados"
