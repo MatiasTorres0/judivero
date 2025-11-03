@@ -136,7 +136,7 @@ def agregar_baneo(request):
         return redirect('inicio')
     
     if request.method == 'POST':
-        form = BaneoForm(request.POST)
+        form = BaneoForm(request.POST, request.FILES)  # AGREGADO request.FILES
         if form.is_valid():
             baneo = form.save(commit=False)
             baneo.canal = canal_actual

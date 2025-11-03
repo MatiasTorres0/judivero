@@ -78,6 +78,39 @@
                     </div>
                     {% endif %}
                 </div>
+
+                <!-- Imagen de Evidencia -->
+                <div class="space-y-2">
+                    <label for="{{ form.imagen.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Imagen de Evidencia (Opcional)
+                    </label>
+                    <div class="flex items-center justify-center w-full">
+                        <label for="{{ form.imagen.id_for_label }}" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
+                                <p class="mb-2 text-sm text-gray-500">
+                                    <span class="font-semibold">Click para subir</span> o arrastra la imagen
+                                </p>
+                                <p class="text-xs text-gray-500">PNG, JPG, JPEG, SVG (MAX. 5MB)</p>
+                            </div>
+                            <input type="file" 
+                                   name="imagen" 
+                                   id="{{ form.imagen.id_for_label }}"
+                                   accept="image/*"
+                                   class="hidden"
+                                   onchange="mostrarNombreArchivo(this)">
+                        </label>
+                    </div>
+                    <p id="nombreArchivo" class="text-sm text-gray-600 mt-2 hidden"></p>
+                    {% if form.imagen.help_text %}
+                    <p class="text-sm text-gray-500">{{ form.imagen.help_text }}</p>
+                    {% endif %}
+                    {% if form.imagen.errors %}
+                    <div class="text-sm text-red-600">
+                        {{ form.imagen.errors }}
+                    </div>
+                    {% endif %}
+                </div>
             </div>
 
             <!-- Form Actions -->
@@ -108,6 +141,7 @@
                 <ul class="text-sm text-red-700 space-y-1">
                     <li>• Verifica cuidadosamente la información del usuario</li>
                     <li>• Asegúrate de tener evidencia del motivo del baneo</li>
+                    <li>• Sube una captura de pantalla como evidencia si es posible</li>
                     <li>• Establece fechas claras para el baneo y desbaneo</li>
                     <li>• Los baneos son acciones serias - úsalos con responsabilidad</li>
                 </ul>
@@ -136,4 +170,15 @@
         color: #9ca3af;
     }
 </style>
+
+<script>
+function mostrarNombreArchivo(input) {
+    const nombreArchivo = document.getElementById('nombreArchivo');
+    if (input.files && input.files[0]) {
+        nombreArchivo.textContent = '✓ Archivo seleccionado: ' + input.files[0].name;
+        nombreArchivo.classList.remove('hidden');
+        nombreArchivo.classList.add('text-green-600', 'font-semibold');
+    }
+}
+</script>
 {% endblock %}

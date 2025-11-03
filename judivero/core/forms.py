@@ -59,7 +59,7 @@ class ComandoForm(forms.ModelForm):
 class BaneoForm(forms.ModelForm):
     class Meta:
         model = Baneos
-        fields = ['nombre_usuario', 'motivo', 'desbaneo']
+        fields = ['nombre_usuario', 'motivo', 'desbaneo', 'imagen']  # AGREGADO 'imagen'
         widgets = {
             'nombre_usuario': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -73,14 +73,19 @@ class BaneoForm(forms.ModelForm):
             'desbaneo': forms.DateTimeInput(attrs={
                 'class': 'form-control',
                 'type': 'datetime-local',
-                'placeholder': 'dd-mm-aaaa --:--'
             }),
+            'imagen': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            })
         }
         labels = {
             'nombre_usuario': 'Nombre de usuario',
             'motivo': 'Motivo del baneo',
             'desbaneo': 'Fecha de desbaneo (Opcional)',
+            'imagen': 'Imagen de evidencia (Opcional)',
         }
         help_texts = {
             'desbaneo': 'Deja en blanco si el baneo es permanente.',
+            'imagen': 'Sube una captura de pantalla como evidencia.',
         }
