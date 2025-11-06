@@ -1,5 +1,25 @@
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm
 from .models import Nota, Comando, Baneos
+
+
+class CustomLoginForm(AuthenticationForm):
+    username = forms.CharField(
+        label='Usuario',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ingresa tu usuario',
+            'autocomplete': 'username'
+        })
+    )
+    password = forms.CharField(
+        label='Contraseña',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ingresa tu contraseña',
+            'autocomplete': 'current-password'
+        })
+    )
 
 
 class NotaForm(forms.ModelForm):
@@ -59,7 +79,7 @@ class ComandoForm(forms.ModelForm):
 class BaneoForm(forms.ModelForm):
     class Meta:
         model = Baneos
-        fields = ['nombre_usuario', 'motivo', 'desbaneo', 'imagen']  # AGREGADO 'imagen'
+        fields = ['nombre_usuario', 'motivo', 'desbaneo', 'imagen']
         widgets = {
             'nombre_usuario': forms.TextInput(attrs={
                 'class': 'form-control',
