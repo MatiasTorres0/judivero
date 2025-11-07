@@ -16,7 +16,6 @@ class BaneosAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Configurar el formato del campo desbaneo si tiene valor
         if self.instance and self.instance.desbaneo:
             self.initial['desbaneo'] = self.instance.desbaneo.strftime('%Y-%m-%dT%H:%M')
 
@@ -85,8 +84,8 @@ class NotaAdmin(admin.ModelAdmin):
 
 @admin.register(Baneos)
 class BaneosAdmin(admin.ModelAdmin):
-    form = BaneosAdminForm  # Usar el formulario personalizado
-    list_display = ['nombre_usuario', 'canal', 'activo', 'fecha_baneo', 'desbaneo']
+    form = BaneosAdminForm
+    list_display = ['nombre_usuario', 'canal', 'activo', 'fecha_baneo', 'desbaneo', 'tiene_imagen']
     list_filter = ['canal', 'activo', 'fecha_baneo']
     search_fields = ['nombre_usuario', 'motivo']
     ordering = ['-fecha_baneo']
@@ -96,7 +95,7 @@ class BaneosAdmin(admin.ModelAdmin):
             'fields': ('canal', 'nombre_usuario', 'user')
         }),
         ('Detalles del Baneo', {
-            'fields': ('motivo', 'activo')
+            'fields': ('motivo', 'imagen', 'activo')
         }),
         ('Fechas', {
             'fields': ('fecha_baneo', 'desbaneo'),
@@ -106,6 +105,10 @@ class BaneosAdmin(admin.ModelAdmin):
     readonly_fields = ['fecha_baneo']
     
     actions = ['desactivar_baneos', 'activar_baneos']
+    
+    def tiene_imagen(self, obj):
+        return "✓" if obj.imagen else "✗"
+    tiene_imagen.short_description = "Imagen"
     
     def desactivar_baneos(self, request, queryset):
         queryset.update(activo=False)

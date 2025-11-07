@@ -4,6 +4,8 @@ from django.utils import timezone
 from django.db.models import Count, Q
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
+from django.template.loader import render_to_string
+from django.contrib.auth.decorators import login_required
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -12,10 +14,15 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 from io import BytesIO
 from datetime import datetime
-from django.contrib.auth.decorators import login_required
-
+import tempfile
+import os
 from .models import Comando, Nota, Baneos, CanalTwitch
-from .forms import ComandoForm, NotaForm, BaneoForm
+from .forms import ComandoForm, NotaForm, BaneoForm, CustomLoginForm
+from django.template.loader import render_to_string
+from django.http import HttpResponse
+from io import BytesIO
+from xhtml2pdf import pisa
+import os
 
 @login_required
 def get_canal_actual(request):
@@ -127,8 +134,6 @@ def agregar_comando(request):
         'canales': canales,
     })
 
-# Reemplaza tu función agregar_baneo con esta versión corregida:
-
 @login_required
 def agregar_baneo(request):
     canal_actual = get_canal_actual(request)
@@ -147,14 +152,9 @@ def agregar_baneo(request):
             if request.user.is_authenticated:
                 baneo.user = request.user
             
-            # Debug: imprimir si hay imagen
-            if 'imagen' in request.FILES:
-                print(f"Imagen recibida: {request.FILES['imagen'].name}")
-            
             baneo.save()
             return redirect('inicio')
         else:
-            # Debug: imprimir errores del formulario
             print(f"Errores del formulario: {form.errors}")
     else:
         form = BaneoForm()
@@ -165,8 +165,6 @@ def agregar_baneo(request):
         'canales': canales,
     })
 
-
-# ==================== NUEVAS VISTAS PARA REPORTES ====================
 @login_required
 def perfil_usuario(request, nombre_usuario):
     """Vista del perfil completo de un usuario con su historial"""
@@ -176,13 +174,11 @@ def perfil_usuario(request, nombre_usuario):
     if not canal_actual:
         return redirect('inicio')
     
-    # Obtener todos los baneos del usuario en este canal
     baneos = Baneos.objects.filter(
         canal=canal_actual,
         nombre_usuario=nombre_usuario
     ).order_by('-fecha_baneo')
     
-    # Estadísticas
     total_baneos = baneos.count()
     baneos_activos = baneos.filter(activo=True).count()
     
@@ -196,15 +192,15 @@ def perfil_usuario(request, nombre_usuario):
     }
     
     return render(request, 'core/perfil_usuario.html', context)
+
 @login_required
 def generar_reporte_pdf(request, nombre_usuario):
-    """Genera un PDF profesional con el historial completo de baneos usando WeasyPrint"""
+    """Genera un PDF usando xhtml2pdf (compatible con Windows)"""
     canal_actual = get_canal_actual(request)
     
     if not canal_actual:
         return HttpResponse('No hay canal seleccionado', status=400)
     
-    # Obtener todos los baneos del usuario
     baneos = Baneos.objects.filter(
         canal=canal_actual,
         nombre_usuario=nombre_usuario
@@ -213,69 +209,31 @@ def generar_reporte_pdf(request, nombre_usuario):
     if not baneos.exists():
         return HttpResponse('No se encontraron registros para este usuario', status=404)
     
-    # Estadísticas
     total_baneos = baneos.count()
     baneos_activos = baneos.filter(activo=True).count()
-    
-    # Contexto para el template
-    context = {
+    es_reincidente = total_baneos > 1
+
+    # Renderizar el template HTML
+    html_string = render_to_string('core/pdf/reporte_baneo.html', {
         'nombre_usuario': nombre_usuario,
         'canal': canal_actual,
+        'fecha_reporte': timezone.now(),
         'baneos': baneos,
         'total_baneos': total_baneos,
         'baneos_activos': baneos_activos,
-        'fecha_reporte': timezone.now(),
-        'es_reincidente': total_baneos > 1,
-    }
-    
-    # Renderizar el template HTML
-    html_string = render_to_string('core/pdf/reporte_baneo.html', context)
-    
-    # Configuración de fuentes
-    font_config = FontConfiguration()
-    
-    # Generar el PDF con WeasyPrint
-    html = HTML(string=html_string, base_url=request.build_absolute_uri())
-    
-    # CSS personalizado para el PDF
-    css = CSS(string='''
-        @page {
-            size: A4;
-            margin: 2cm;
-            @top-right {
-                content: "Página " counter(page) " de " counter(pages);
-                font-size: 10px;
-                color: #666;
-            }
-        }
-        
-        body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            color: #333;
-        }
-        
-        .page-break {
-            page-break-after: always;
-        }
-        
-        /* Asegurar que las imágenes se muestren correctamente */
-        img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-        }
-    ''', font_config=font_config)
-    
-    # Generar PDF
-    pdf_file = html.write_pdf(stylesheets=[css], font_config=font_config)
-    
-    # Crear respuesta HTTP
-    response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="reporte_{nombre_usuario}_{canal_actual.nombre}_{timezone.now().strftime("%Y%m%d_%H%M")}.pdf"'
-    
-    return response
+        'es_reincidente': es_reincidente,
+    })
 
+    # Crear PDF
+    result = BytesIO()
+    pdf = pisa.pisaDocument(BytesIO(html_string.encode("UTF-8")), result)
+    
+    if not pdf.err:
+        response = HttpResponse(result.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="reporte_{nombre_usuario}_{canal_actual.nombre}_{timezone.now().strftime("%Y%m%d_%H%M")}.pdf"'
+        return response
+    
+    return HttpResponse('Error al generar el PDF: %s' % pdf.err, status=500)
 
 @login_required
 def buscar_usuario(request):
@@ -287,13 +245,11 @@ def buscar_usuario(request):
     resultados = []
     
     if username:
-        # Buscar en el canal actual
         baneos = Baneos.objects.filter(
             canal=canal_actual,
             nombre_usuario__icontains=username
         ).order_by('-fecha_baneo')
         
-        # Agrupar por usuario
         usuarios = {}
         for baneo in baneos:
             if baneo.nombre_usuario not in usuarios:
@@ -323,16 +279,16 @@ def buscar_usuario(request):
     return render(request, 'core/buscar_usuario.html', context)
 
 def login_view(request):
-       if request.method == 'POST':
-           form = CustomLoginForm(request, data=request.POST)
-           if form.is_valid():
-               user = form.get_user()
-               login(request, user)
-               return redirect('inicio')
-       else:
-           form = CustomLoginForm()
-       
-       return render(request, 'registration/login.html', {'form': form})
+    if request.method == 'POST':
+        form = CustomLoginForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('inicio')
+    else:
+        form = CustomLoginForm()
+    
+    return render(request, 'registration/login.html', {'form': form})
 
 def logout_view(request):
     logout(request)

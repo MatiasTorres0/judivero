@@ -5,294 +5,327 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte de Moderación - {{ nombre_usuario }}</title>
     <style>
+        /* ---------- ROOT & RESET ---------- */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --danger: #ef4444;
+            --danger-light: #fef2f2;
+            --warning: #f59e0b;
+            --warning-light: #fffbeb;
+            --success: #10b981;
+            --success-light: #ecfdf5;
+            --dark: #111827;
+            --gray: #6b7280;
+            --gray-light: #f3f4f6;
+            --radius: 12px;
+            --radius-sm: 6px;
+        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #1f2937;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--dark);
             font-size: 11pt;
-            line-height: 1.6;
+            line-height: 1.7;
+            background: #fafafa;
+            padding: 40px;
         }
 
-        /* Header */
+        /* ---------- HEADER ---------- */
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px 30px;
+            background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
+            color: #fff;
+            padding: 50px 40px;
             text-align: center;
-            margin-bottom: 30px;
-            border-radius: 8px;
+            border-radius: var(--radius);
+            margin-bottom: 40px;
+            box-shadow: 0 10px 25px rgba(79, 70, 229, .25);
         }
-
         .header h1 {
-            font-size: 28pt;
-            margin-bottom: 10px;
-            font-weight: 700;
+            font-size: 32pt;
+            font-weight: 800;
+            letter-spacing: -.5px;
+            margin-bottom: 8px;
         }
-
         .header .subtitle {
-            font-size: 14pt;
-            opacity: 0.95;
+            font-size: 15pt;
+            opacity: .9;
             font-weight: 300;
         }
-
         .header .canal-info {
-            margin-top: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, .15);
+            backdrop-filter: blur(4px);
+            padding: 10px 24px;
+            border-radius: 30px;
             font-size: 12pt;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 10px 20px;
-            border-radius: 5px;
-            display: inline-block;
+            font-weight: 500;
         }
 
-        /* Usuario Info */
+        /* ---------- USER CARD ---------- */
         .usuario-info {
-            background: #f9fafb;
-            border-left: 5px solid #667eea;
-            padding: 20px;
-            margin-bottom: 30px;
-            border-radius: 5px;
-        }
-
-        .usuario-info h2 {
-            color: #667eea;
-            font-size: 20pt;
-            margin-bottom: 15px;
-        }
-
-        .usuario-info .meta {
-            color: #6b7280;
-            font-size: 10pt;
-            margin-top: 10px;
-        }
-
-        /* Stats Cards */
-        .stats-container {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: var(--radius);
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .05);
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
-            gap: 15px;
+            align-items: center;
+            gap: 24px;
         }
-
-        .stat-card {
-            flex: 1;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .stat-card.primary {
-            background: #dbeafe;
-            border: 2px solid #3b82f6;
-        }
-
-        .stat-card.danger {
-            background: #fee2e2;
-            border: 2px solid #ef4444;
-        }
-
-        .stat-card.warning {
-            background: #fef3c7;
-            border: 2px solid #f59e0b;
-        }
-
-        .stat-card .stat-value {
-            font-size: 36pt;
+        .usuario-info h2 {
+            font-size: 22pt;
             font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 5px;
+            color: var(--primary);
+            flex: 1;
+        }
+        .usuario-info .meta {
+            color: var(--gray);
+            font-size: 10pt;
+            line-height: 1.8;
         }
 
+        /* ---------- STATS ---------- */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 28px 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .05);
+            border: 2px solid transparent;
+            transition: transform .2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+        }
+        .stat-card.primary {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        .stat-card.danger {
+            border-color: var(--danger);
+            background: var(--danger-light);
+        }
+        .stat-card.warning {
+            border-color: var(--warning);
+            background: var(--warning-light);
+        }
+        .stat-card .stat-value {
+            font-size: 38pt;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
         .stat-card .stat-label {
             font-size: 10pt;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #6b7280;
+            letter-spacing: .5px;
+            color: var(--gray);
             font-weight: 600;
         }
 
-        /* Estado Badge */
+        /* ---------- STATUS BADGE ---------- */
         .estado-badge {
-            display: inline-block;
-            padding: 8px 20px;
-            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 auto 40px;
+            padding: 12px 28px;
+            border-radius: 30px;
             font-weight: 700;
-            font-size: 11pt;
-            margin: 20px 0;
+            font-size: 12pt;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
         }
-
         .estado-badge.reincidente {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 2px solid #ef4444;
+            background: var(--danger-light);
+            color: var(--danger);
+            border: 2px solid var(--danger);
         }
-
         .estado-badge.primera {
-            background: #fef3c7;
-            color: #92400e;
-            border: 2px solid #f59e0b;
+            background: var(--warning-light);
+            color: #b45309;
+            border: 2px solid var(--warning);
         }
 
-        /* Section Headers */
+        /* ---------- SECTION HEADER ---------- */
         .section-header {
-            background: #f3f4f6;
-            padding: 15px 20px;
-            margin: 30px 0 20px 0;
-            border-left: 5px solid #667eea;
-            border-radius: 5px;
+            background: var(--primary-light);
+            border-left: 6px solid var(--primary);
+            border-radius: var(--radius);
+            padding: 18px 28px;
+            margin: 40px 0 24px;
         }
-
         .section-header h2 {
-            color: #374151;
-            font-size: 16pt;
-            font-weight: 600;
+            font-size: 18pt;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        /* Baneos Items */
+        /* ---------- BANEO LIST ---------- */
         .baneos-list {
-            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
         }
-
         .baneo-item {
-            background: white;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .05);
             page-break-inside: avoid;
+            transition: box-shadow .25s;
         }
-
+        .baneo-item:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
+        }
         .baneo-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f3f4f6;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e5e7eb;
         }
-
         .baneo-number {
-            font-size: 14pt;
-            font-weight: 700;
-            color: #667eea;
+            font-size: 16pt;
+            font-weight: 800;
+            color: var(--primary);
         }
-
         .baneo-status {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 18px;
+            border-radius: 20px;
             font-size: 9pt;
             font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: .4px;
         }
-
         .baneo-status.activo {
-            background: #fee2e2;
-            color: #991b1b;
+            background: var(--danger-light);
+            color: var(--danger);
         }
-
         .baneo-status.completado {
-            background: #d1fae5;
-            color: #065f46;
+            background: var(--success-light);
+            color: var(--success);
         }
-
         .baneo-details {
-            margin: 15px 0;
+            margin: 18px 0;
         }
-
         .detail-row {
             display: flex;
             margin-bottom: 10px;
             font-size: 10pt;
         }
-
         .detail-label {
             font-weight: 600;
-            color: #6b7280;
-            width: 150px;
+            color: var(--gray);
+            width: 160px;
             flex-shrink: 0;
         }
-
         .detail-value {
-            color: #1f2937;
+            color: var(--dark);
             flex: 1;
         }
 
+        /* ---------- MOTIVO & EVIDENCIA ---------- */
         .motivo-box {
-            background: #f9fafb;
-            border-left: 3px solid #ef4444;
-            padding: 15px;
-            margin-top: 15px;
-            border-radius: 5px;
+            background: #fff;
+            border: 1px solid #fecaca;
+            border-left: 5px solid var(--danger);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            margin-top: 20px;
         }
-
         .motivo-box .label {
             font-weight: 700;
-            color: #374151;
+            color: var(--danger);
             margin-bottom: 8px;
             font-size: 10pt;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-
         .motivo-box .content {
             color: #4b5563;
-            line-height: 1.7;
+            line-height: 1.8;
             font-size: 10pt;
         }
-
-        /* Imagen de evidencia */
         .evidencia-box {
-            background: #eff6ff;
-            border: 2px solid #3b82f6;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
+            background: var(--primary-light);
+            border: 1px solid #c7d2fe;
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            margin-top: 20px;
             text-align: center;
         }
-
         .evidencia-box .label {
             font-weight: 700;
-            color: #1e40af;
-            margin-bottom: 10px;
+            color: var(--primary);
+            margin-bottom: 12px;
             font-size: 10pt;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
-
         .evidencia-box img {
             max-width: 100%;
-            max-height: 300px;
-            border-radius: 5px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-top: 10px;
+            max-height: 320px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .12);
+            margin-top: 12px;
         }
 
-        /* Footer */
+        /* ---------- FOOTER ---------- */
         .footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #e5e7eb;
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 1px solid #e5e7eb;
             text-align: center;
-            color: #6b7280;
+            color: var(--gray);
             font-size: 9pt;
         }
-
         .footer .logo {
             font-weight: 700;
-            color: #667eea;
-            margin-bottom: 5px;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 11pt;
         }
-
         .footer .confidencial {
-            margin-top: 10px;
+            margin-top: 12px;
             font-style: italic;
-            color: #ef4444;
+            color: var(--danger);
         }
 
-        /* Page Break */
+        /* ---------- PAGE BREAK ---------- */
         .page-break {
             page-break-after: always;
+        }
+
+        /* ---------- UTILS ---------- */
+        .center {
+            display: flex;
+            justify-content: center;
         }
     </style>
 </head>
@@ -302,7 +335,7 @@
         <h1>📋 Reporte de Moderación</h1>
         <p class="subtitle">Sistema de Gestión Judivero</p>
         <div class="canal-info">
-            Canal: {{ canal.nombre }} (@{{ canal.streamer }})
+            <span>📺</span> Canal: {{ canal.nombre }} (@{{ canal.streamer }})
         </div>
     </div>
 
@@ -321,12 +354,10 @@
             <div class="stat-value">{{ total_baneos }}</div>
             <div class="stat-label">Total Infracciones</div>
         </div>
-        
         <div class="stat-card danger">
             <div class="stat-value">{{ baneos_activos }}</div>
             <div class="stat-label">Sanciones Activas</div>
         </div>
-        
         <div class="stat-card warning">
             <div class="stat-value">{{ total_baneos|add:"-"|add:baneos_activos }}</div>
             <div class="stat-label">Completadas</div>
@@ -334,7 +365,7 @@
     </div>
 
     <!-- Estado del Usuario -->
-    <div style="text-align: center;">
+    <div class="center">
         {% if es_reincidente %}
         <div class="estado-badge reincidente">
             ⚠️ USUARIO REINCIDENTE
@@ -357,7 +388,7 @@
             <div class="baneo-header">
                 <span class="baneo-number">Infracción #{{ forloop.counter }}</span>
                 <span class="baneo-status {% if baneo.activo %}activo{% else %}completado{% endif %}">
-                    {% if baneo.activo %}🔴 ACTIVO{% else %}✅ COMPLETADO{% endif %}
+                    {% if baneo.activo %}🔴 Activo{% else %}✅ Completado{% endif %}
                 </span>
             </div>
 
@@ -366,7 +397,6 @@
                     <span class="detail-label">📅 Fecha de Baneo:</span>
                     <span class="detail-value">{{ baneo.fecha_baneo|date:"d/m/Y H:i" }}</span>
                 </div>
-
                 {% if baneo.desbaneo %}
                 <div class="detail-row">
                     <span class="detail-label">🔓 Fecha de Desbaneo:</span>
@@ -375,21 +405,19 @@
                 {% else %}
                 <div class="detail-row">
                     <span class="detail-label">🔓 Desbaneo:</span>
-                    <span class="detail-value" style="color: #ef4444; font-weight: 600;">PERMANENTE</span>
+                    <span class="detail-value" style="color: var(--danger); font-weight: 700;">Permanente</span>
                 </div>
                 {% endif %}
-
                 <div class="detail-row">
                     <span class="detail-label">⚖️ Estado:</span>
                     <span class="detail-value">
                         {% if baneo.activo %}
-                            <strong style="color: #ef4444;">Sanción Activa</strong>
+                            <strong style="color: var(--danger);">Sanción Activa</strong>
                         {% else %}
-                            <strong style="color: #10b981;">Sanción Completada</strong>
+                            <strong style="color: var(--success);">Sanción Completada</strong>
                         {% endif %}
                     </span>
                 </div>
-
                 {% if baneo.user %}
                 <div class="detail-row">
                     <span class="detail-label">👮 Moderador:</span>
@@ -399,11 +427,10 @@
             </div>
 
             <div class="motivo-box">
-                <div class="label">📝 Motivo de la Sanción:</div>
+                <div class="label">📝 Motivo de la Sanción</div>
                 <div class="content">{{ baneo.motivo }}</div>
             </div>
 
-            <!-- Imagen de evidencia si existe -->
             {% if baneo.imagen %}
             <div class="evidencia-box">
                 <div class="label">📸 Evidencia Visual</div>
