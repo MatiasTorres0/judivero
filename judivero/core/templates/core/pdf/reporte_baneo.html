@@ -14,7 +14,12 @@
         
         @page {
             size: A4;
-            margin: 2cm;
+            margin: 1.5cm;
+            @bottom-center {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 9pt;
+                color: #6b7280;
+            }
         }
         
         * {
@@ -27,102 +32,137 @@
             font-family: Helvetica, Arial, sans-serif;
             font-size: 10pt;
             color: #1f2937;
-            line-height: 1.6;
+            line-height: 1.5;
+            background-color: #ffffff;
         }
         
         /* ==================== HEADER PRINCIPAL ==================== */
         .main-header {
-            background-color: #4f46e5;
+            background: linear-gradient(to right, #4f46e5, #3730a3);
             color: #ffffff;
-            padding: 30px 20px;
-            text-align: center;
-            margin-bottom: 30px;
+            padding: 25px 20px;
+            margin-bottom: 25px;
             border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .main-header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 120px;
+            height: 120px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(30%, -30%);
         }
         
         .main-header h1 {
-            font-size: 24pt;
-            margin-bottom: 8px;
+            font-size: 22pt;
+            margin-bottom: 5px;
             font-weight: bold;
+            position: relative;
         }
         
         .main-header .subtitle {
-            font-size: 12pt;
-            margin-bottom: 15px;
+            font-size: 11pt;
+            margin-bottom: 12px;
+            opacity: 0.9;
+            position: relative;
         }
         
         .main-header .canal-info {
             background-color: rgba(255, 255, 255, 0.2);
-            padding: 8px 20px;
+            padding: 6px 16px;
             display: inline-block;
-            border-radius: 15px;
-            font-size: 11pt;
+            border-radius: 20px;
+            font-size: 10pt;
+            position: relative;
         }
         
         /* ==================== INFORMACIÓN DE USUARIO ==================== */
         .user-info {
-            background-color: #f9fafb;
-            border: 2px solid #4f46e5;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            padding: 20px;
+            padding: 18px;
             margin-bottom: 25px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
         
         .user-info h2 {
-            font-size: 18pt;
-            color: #4f46e5;
-            margin-bottom: 10px;
+            font-size: 16pt;
+            color: #1e293b;
+            margin-bottom: 8px;
+            display: inline-block;
+            border-bottom: 2px solid #4f46e5;
+            padding-bottom: 3px;
         }
         
         .user-info .meta {
             font-size: 9pt;
-            color: #6b7280;
+            color: #64748b;
+            margin-top: 10px;
         }
         
-        /* ==================== TABLA DE ESTADÍSTICAS ==================== */
-        .stats-table {
+        /* ==================== ESTADÍSTICAS ==================== */
+        .stats-container {
             width: 100%;
             margin-bottom: 25px;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 15px;
         }
         
-        .stats-table td {
+        .stats-container td {
             width: 33.33%;
-            padding: 20px;
+            padding: 20px 15px;
             text-align: center;
-            border: 2px solid #e5e7eb;
+            border-radius: 10px;
             background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
         }
         
-        .stats-table .stat-value {
-            font-size: 32pt;
+        .stats-container td::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+        
+        .stats-container .primary::before {
+            background-color: #4f46e5;
+        }
+        
+        .stats-container .danger::before {
+            background-color: #ef4444;
+        }
+        
+        .stats-container .warning::before {
+            background-color: #f59e0b;
+        }
+        
+        .stats-container .stat-value {
+            font-size: 28pt;
             font-weight: bold;
             color: #1f2937;
             display: block;
             margin-bottom: 5px;
+            line-height: 1;
         }
         
-        .stats-table .stat-label {
+        .stats-container .stat-label {
             font-size: 9pt;
             color: #6b7280;
             text-transform: uppercase;
             font-weight: bold;
-        }
-        
-        /* Colores específicos para cada estadística */
-        .stats-table .primary {
-            border-color: #4f46e5;
-            background-color: #eef2ff;
-        }
-        
-        .stats-table .danger {
-            border-color: #ef4444;
-            background-color: #fef2f2;
-        }
-        
-        .stats-table .warning {
-            border-color: #f59e0b;
-            background-color: #fffbeb;
+            letter-spacing: 0.5px;
         }
         
         /* ==================== ESTADO BADGE ==================== */
@@ -134,50 +174,89 @@
         .badge {
             display: inline-block;
             padding: 10px 25px;
-            border-radius: 20px;
+            border-radius: 25px;
             font-weight: bold;
-            font-size: 11pt;
+            font-size: 10pt;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
         }
         
         .badge.reincidente {
             background-color: #fef2f2;
             color: #dc2626;
-            border: 2px solid #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        .badge.reincidente::before {
+            content: "⚠️";
+            margin-right: 8px;
         }
         
         .badge.primera {
             background-color: #fffbeb;
             color: #d97706;
-            border: 2px solid #f59e0b;
+            border: 1px solid #fed7aa;
+        }
+        
+        .badge.primera::before {
+            content: "ℹ️";
+            margin-right: 8px;
         }
         
         /* ==================== SECTION HEADER ==================== */
         .section-header {
-            background-color: #eef2ff;
-            border-left: 5px solid #4f46e5;
-            padding: 12px 20px;
+            background-color: #f1f5f9;
+            border-left: 4px solid #4f46e5;
+            padding: 12px 18px;
             margin: 30px 0 20px;
+            border-radius: 0 8px 8px 0;
         }
         
         .section-header h2 {
-            font-size: 16pt;
-            color: #4f46e5;
+            font-size: 15pt;
+            color: #1e293b;
             font-weight: bold;
+        }
+        
+        .section-header h2::before {
+            content: "📜";
+            margin-right: 10px;
         }
         
         /* ==================== BANEO ITEM ==================== */
         .baneo-item {
             background-color: #ffffff;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            padding: 20px;
+            padding: 18px;
             margin-bottom: 20px;
             page-break-inside: avoid;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        
+        .baneo-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            border-radius: 5px 0 0 5px;
+        }
+        
+        .baneo-item.activo::before {
+            background-color: #ef4444;
+        }
+        
+        .baneo-item.completado::before {
+            background-color: #10b981;
         }
         
         .baneo-header {
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 10px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 12px;
             margin-bottom: 15px;
         }
         
@@ -187,9 +266,9 @@
         }
         
         .baneo-number {
-            font-size: 14pt;
+            font-size: 13pt;
             font-weight: bold;
-            color: #4f46e5;
+            color: #1e293b;
         }
         
         .baneo-status {
@@ -198,21 +277,24 @@
         
         .status-label {
             display: inline-block;
-            padding: 5px 15px;
-            border-radius: 12px;
+            padding: 6px 12px;
+            border-radius: 15px;
             font-size: 8pt;
             font-weight: bold;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .status-label.activo {
             background-color: #fef2f2;
             color: #dc2626;
+            border: 1px solid #fecaca;
         }
         
         .status-label.completado {
             background-color: #ecfdf5;
             color: #10b981;
+            border: 1px solid #a7f3d0;
         }
         
         /* ==================== DETAILS TABLE ==================== */
@@ -223,18 +305,23 @@
         }
         
         .details-table tr {
-            border-bottom: 1px solid #f3f4f6;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .details-table tr:last-child {
+            border-bottom: none;
         }
         
         .details-table td {
             padding: 8px 0;
             font-size: 9pt;
+            vertical-align: top;
         }
         
         .details-table .label {
-            width: 160px;
+            width: 140px;
             font-weight: bold;
-            color: #6b7280;
+            color: #64748b;
         }
         
         .details-table .value {
@@ -259,6 +346,7 @@
             padding: 15px;
             margin-top: 15px;
             border-radius: 4px;
+            position: relative;
         }
         
         .motivo-box .label {
@@ -266,29 +354,45 @@
             color: #dc2626;
             margin-bottom: 8px;
             font-size: 9pt;
+            display: flex;
+            align-items: center;
+        }
+        
+        .motivo-box .label::before {
+            content: "📝";
+            margin-right: 6px;
         }
         
         .motivo-box .content {
             color: #4b5563;
             font-size: 9pt;
-            line-height: 1.7;
+            line-height: 1.6;
         }
         
         /* ==================== EVIDENCIA BOX ==================== */
         .evidencia-box {
-            background-color: #eef2ff;
-            border: 1px solid #c7d2fe;
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
             padding: 15px;
             margin-top: 15px;
             text-align: center;
             border-radius: 4px;
+            border-left: 4px solid #0ea5e9;
         }
         
         .evidencia-box .label {
             font-weight: bold;
-            color: #4f46e5;
+            color: #0c4a6e;
             margin-bottom: 10px;
             font-size: 9pt;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .evidencia-box .label::before {
+            content: "📸";
+            margin-right: 6px;
         }
         
         .evidencia-box img {
@@ -296,16 +400,17 @@
             max-height: 300px;
             border: 1px solid #c7d2fe;
             margin-top: 10px;
+            border-radius: 4px;
         }
         
         /* ==================== FOOTER ==================== */
         .footer {
             margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid #e2e8f0;
             text-align: center;
             font-size: 8pt;
-            color: #6b7280;
+            color: #64748b;
         }
         
         .footer .logo {
@@ -338,21 +443,41 @@
         .text-success {
             color: #10b981;
         }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .mb-1 {
+            margin-bottom: 10px;
+        }
+        
+        .mb-2 {
+            margin-bottom: 20px;
+        }
+        
+        .mt-1 {
+            margin-top: 10px;
+        }
+        
+        .mt-2 {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <!-- ==================== HEADER PRINCIPAL ==================== -->
     <div class="main-header">
-        <h1>📋 Reporte de Moderación</h1>
+        <h1>Reporte de Moderación</h1>
         <p class="subtitle">Sistema de Gestión Judivero</p>
         <div class="canal-info">
-            📺 Canal: {{ canal.nombre }} (@{{ canal.streamer }})
+            Canal: {{ canal.nombre }} (@{{ canal.streamer }})
         </div>
     </div>
 
     <!-- ==================== INFORMACIÓN DEL USUARIO ==================== -->
     <div class="user-info">
-        <h2>👤 {{ nombre_usuario }}</h2>
+        <h2>{{ nombre_usuario }}</h2>
         <div class="meta">
             <strong>Fecha del reporte:</strong> {{ fecha_reporte|date:"d/m/Y H:i" }}<br>
             <strong>Generado por:</strong> Sistema de Moderación Judivero
@@ -360,7 +485,7 @@
     </div>
 
     <!-- ==================== ESTADÍSTICAS ==================== -->
-    <table class="stats-table">
+    <table class="stats-container">
         <tr>
             <td class="primary">
                 <span class="stat-value">{{ total_baneos }}</span>
@@ -381,23 +506,23 @@
     <div class="status-badge">
         {% if es_reincidente %}
         <span class="badge reincidente">
-            ⚠️ USUARIO REINCIDENTE
+            USUARIO REINCIDENTE
         </span>
         {% else %}
         <span class="badge primera">
-            ℹ️ PRIMERA INFRACCIÓN
+            PRIMERA INFRACCIÓN
         </span>
         {% endif %}
     </div>
 
     <!-- ==================== SECTION HEADER ==================== -->
     <div class="section-header">
-        <h2>📜 Historial Detallado de Sanciones</h2>
+        <h2>Historial Detallado de Sanciones</h2>
     </div>
 
     <!-- ==================== LISTA DE BANEOS ==================== -->
     {% for baneo in baneos %}
-    <div class="baneo-item">
+    <div class="baneo-item {% if baneo.activo %}activo{% else %}completado{% endif %}">
         <!-- Header del Baneo -->
         <div class="baneo-header">
             <table>
@@ -405,7 +530,7 @@
                     <td class="baneo-number">Infracción #{{ forloop.counter }}</td>
                     <td class="baneo-status">
                         <span class="status-label {% if baneo.activo %}activo{% else %}completado{% endif %}">
-                            {% if baneo.activo %}🔴 Activo{% else %}✅ Completado{% endif %}
+                            {% if baneo.activo %}Activo{% else %}Completado{% endif %}
                         </span>
                     </td>
                 </tr>
@@ -415,22 +540,22 @@
         <!-- Tabla de Detalles -->
         <table class="details-table">
             <tr>
-                <td class="label">📅 Fecha de Baneo:</td>
+                <td class="label">Fecha de Baneo:</td>
                 <td class="value">{{ baneo.fecha_baneo|date:"d/m/Y H:i" }}</td>
             </tr>
             {% if baneo.desbaneo %}
             <tr>
-                <td class="label">🔓 Fecha de Desbaneo:</td>
+                <td class="label">Fecha de Desbaneo:</td>
                 <td class="value">{{ baneo.desbaneo|date:"d/m/Y H:i" }}</td>
             </tr>
             {% else %}
             <tr>
-                <td class="label">🔓 Desbaneo:</td>
+                <td class="label">Desbaneo:</td>
                 <td class="value-danger">Permanente</td>
             </tr>
             {% endif %}
             <tr>
-                <td class="label">⚖️ Estado:</td>
+                <td class="label">Estado:</td>
                 <td class="value">
                     {% if baneo.activo %}
                         <strong class="text-danger">Sanción Activa</strong>
@@ -441,7 +566,7 @@
             </tr>
             {% if baneo.user %}
             <tr>
-                <td class="label">👮 Moderador:</td>
+                <td class="label">Moderador:</td>
                 <td class="value">{{ baneo.user.username }}</td>
             </tr>
             {% endif %}
@@ -449,14 +574,14 @@
 
         <!-- Caja de Motivo -->
         <div class="motivo-box">
-            <div class="label">📝 Motivo de la Sanción</div>
+            <div class="label">Motivo de la Sanción</div>
             <div class="content">{{ baneo.motivo }}</div>
         </div>
 
         <!-- Caja de Evidencia (si existe) -->
         {% if baneo.imagen %}
         <div class="evidencia-box">
-            <div class="label">📸 Evidencia Visual</div>
+            <div class="label">Evidencia Visual</div>
             <img src="file://{{ baneo.imagen.path }}" alt="Evidencia del baneo">
         </div>
         {% endif %}
@@ -470,7 +595,7 @@
 
     <!-- ==================== FOOTER ==================== -->
     <div class="footer">
-        <div class="logo">🛡️ Sistema de Moderación Judivero</div>
+        <div class="logo">Sistema de Moderación Judivero</div>
         <div>Canal: {{ canal.nombre }} - Reporte generado el {{ fecha_reporte|date:"d/m/Y H:i" }}</div>
         <div class="confidencial">
             ⚠️ Este documento contiene información confidencial de moderación
