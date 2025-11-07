@@ -6,23 +6,14 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter, A4
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 from io import BytesIO
 from datetime import datetime
-import tempfile
-import os
-from .models import Comando, Nota, Baneos, CanalTwitch
-from .forms import ComandoForm, NotaForm, BaneoForm, CustomLoginForm
-from django.template.loader import render_to_string
-from django.http import HttpResponse
-from io import BytesIO
 from xhtml2pdf import pisa
 import os
+
+from .models import Comando, Nota, Baneos, CanalTwitch
+from .forms import ComandoForm, NotaForm, BaneoForm, CustomLoginForm
+
 
 @login_required
 def get_canal_actual(request):
@@ -40,6 +31,7 @@ def get_canal_actual(request):
         request.session['canal_actual_id'] = canal.id
     return canal
 
+
 @login_required
 def cambiar_canal(request, canal_id):
     """Vista para cambiar de canal"""
@@ -47,6 +39,7 @@ def cambiar_canal(request, canal_id):
     request.session['canal_actual_id'] = canal.id
     next_url = request.GET.get('next', 'inicio')
     return redirect(next_url)
+
 
 @login_required
 def inicio(request):
@@ -67,6 +60,7 @@ def inicio(request):
     }
     return render(request, 'core/inicio.html', context)
 
+
 @login_required
 def notas_view(request):
     canal_actual = get_canal_actual(request)
@@ -83,6 +77,7 @@ def notas_view(request):
         'canales': canales,
     }
     return render(request, 'core/notas.html', context)
+
 
 @login_required
 def agregar_nota(request):
@@ -110,6 +105,7 @@ def agregar_nota(request):
         'canales': canales,
     })
 
+
 @login_required
 def agregar_comando(request):
     canal_actual = get_canal_actual(request)
@@ -133,6 +129,7 @@ def agregar_comando(request):
         'canal_actual': canal_actual,
         'canales': canales,
     })
+
 
 @login_required
 def agregar_baneo(request):
@@ -165,6 +162,7 @@ def agregar_baneo(request):
         'canales': canales,
     })
 
+
 @login_required
 def perfil_usuario(request, nombre_usuario):
     """Vista del perfil completo de un usuario con su historial"""
@@ -193,28 +191,71 @@ def perfil_usuario(request, nombre_usuario):
     
     return render(request, 'core/perfil_usuario.html', context)
 
+
+def link_callback(uri, rel):
+    """
+    Convierte URIs HTML a rutas del sistema de archivos para xhtml2pdf.
+    Especialmente importante para cargar imágenes correctamente.
+    """
+    import os
+    from django.conf import settings
+    
+    # Si la URI ya es una ruta de archivo, usarla directamente
+    if uri.startswith('file://'):
+        return uri.replace('file://', '')
+    
+    # Para archivos de media
+    if uri.startswith(settings.MEDIA_URL):
+        path = os.path.join(
+            settings.MEDIA_ROOT,
+            uri.replace(settings.MEDIA_URL, "")
+        )
+        if os.path.exists(path):
+            return path
+    
+    # Para archivos estáticos
+    if uri.startswith(settings.STATIC_URL):
+        path = os.path.join(
+            settings.STATIC_ROOT or settings.BASE_DIR,
+            uri.replace(settings.STATIC_URL, "")
+        )
+        if os.path.exists(path):
+            return path
+    
+    # Si no encuentra nada, devolver la URI original
+    return uri
+
+
 @login_required
 def generar_reporte_pdf(request, nombre_usuario):
-    """Genera un PDF usando xhtml2pdf (compatible con Windows)"""
+    """
+    Genera un PDF profesional usando xhtml2pdf con template optimizado.
+    Compatible con Windows sin dependencias externas complicadas.
+    """
     canal_actual = get_canal_actual(request)
     
     if not canal_actual:
         return HttpResponse('No hay canal seleccionado', status=400)
     
+    # Obtener baneos del usuario
     baneos = Baneos.objects.filter(
         canal=canal_actual,
         nombre_usuario=nombre_usuario
     ).order_by('-fecha_baneo')
     
     if not baneos.exists():
-        return HttpResponse('No se encontraron registros para este usuario', status=404)
+        return HttpResponse(
+            f'No se encontraron registros para el usuario "{nombre_usuario}" en el canal {canal_actual.nombre}',
+            status=404
+        )
     
+    # Calcular estadísticas
     total_baneos = baneos.count()
     baneos_activos = baneos.filter(activo=True).count()
     es_reincidente = total_baneos > 1
 
-    # Renderizar el template HTML
-    html_string = render_to_string('core/pdf/reporte_baneo.html', {
+    # Contexto para el template
+    context = {
         'nombre_usuario': nombre_usuario,
         'canal': canal_actual,
         'fecha_reporte': timezone.now(),
@@ -222,18 +263,39 @@ def generar_reporte_pdf(request, nombre_usuario):
         'total_baneos': total_baneos,
         'baneos_activos': baneos_activos,
         'es_reincidente': es_reincidente,
-    })
+    }
 
-    # Crear PDF
+    # Renderizar el template HTML
+    html_string = render_to_string('core/pdf/reporte_baneo.html', context)
+
+    # Crear el PDF
     result = BytesIO()
-    pdf = pisa.pisaDocument(BytesIO(html_string.encode("UTF-8")), result)
     
-    if not pdf.err:
-        response = HttpResponse(result.getvalue(), content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="reporte_{nombre_usuario}_{canal_actual.nombre}_{timezone.now().strftime("%Y%m%d_%H%M")}.pdf"'
-        return response
+    # Convertir HTML a PDF con callback para manejar imágenes
+    pdf_status = pisa.pisaDocument(
+        BytesIO(html_string.encode("UTF-8")),
+        result,
+        link_callback=link_callback,
+        encoding='UTF-8'
+    )
     
-    return HttpResponse('Error al generar el PDF: %s' % pdf.err, status=500)
+    # Verificar si hubo errores
+    if pdf_status.err:
+        return HttpResponse(
+            f'Error al generar el PDF. Código de error: {pdf_status.err}',
+            status=500
+        )
+    
+    # Preparar la respuesta HTTP
+    pdf_content = result.getvalue()
+    response = HttpResponse(pdf_content, content_type='application/pdf')
+    
+    # Nombre del archivo
+    filename = f'reporte_{nombre_usuario}_{canal_actual.nombre}_{timezone.now().strftime("%Y%m%d_%H%M")}.pdf'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    return response
+
 
 @login_required
 def buscar_usuario(request):
@@ -278,6 +340,7 @@ def buscar_usuario(request):
     
     return render(request, 'core/buscar_usuario.html', context)
 
+
 def login_view(request):
     if request.method == 'POST':
         form = CustomLoginForm(request, data=request.POST)
@@ -289,6 +352,7 @@ def login_view(request):
         form = CustomLoginForm()
     
     return render(request, 'registration/login.html', {'form': form})
+
 
 def logout_view(request):
     logout(request)
