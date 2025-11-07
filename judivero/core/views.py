@@ -127,6 +127,8 @@ def agregar_comando(request):
         'canales': canales,
     })
 
+# Reemplaza tu función agregar_baneo con esta versión corregida:
+
 @login_required
 def agregar_baneo(request):
     canal_actual = get_canal_actual(request)
@@ -136,15 +138,24 @@ def agregar_baneo(request):
         return redirect('inicio')
     
     if request.method == 'POST':
-        form = BaneoForm(request.POST, request.FILES)  # AGREGADO request.FILES
+        form = BaneoForm(request.POST, request.FILES)
+        
         if form.is_valid():
             baneo = form.save(commit=False)
             baneo.canal = canal_actual
             
             if request.user.is_authenticated:
                 baneo.user = request.user
+            
+            # Debug: imprimir si hay imagen
+            if 'imagen' in request.FILES:
+                print(f"Imagen recibida: {request.FILES['imagen'].name}")
+            
             baneo.save()
             return redirect('inicio')
+        else:
+            # Debug: imprimir errores del formulario
+            print(f"Errores del formulario: {form.errors}")
     else:
         form = BaneoForm()
     
@@ -185,10 +196,9 @@ def perfil_usuario(request, nombre_usuario):
     }
     
     return render(request, 'core/perfil_usuario.html', context)
-
 @login_required
 def generar_reporte_pdf(request, nombre_usuario):
-    """Genera un PDF con el historial completo de baneos de un usuario"""
+    """Genera un PDF profesional con el historial completo de baneos usando WeasyPrint"""
     canal_actual = get_canal_actual(request)
     
     if not canal_actual:
@@ -203,157 +213,69 @@ def generar_reporte_pdf(request, nombre_usuario):
     if not baneos.exists():
         return HttpResponse('No se encontraron registros para este usuario', status=404)
     
-    # Crear el PDF
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72,
-                            topMargin=72, bottomMargin=18)
-    
-    # Contenedor para los elementos del PDF
-    elements = []
-    
-    # Estilos
-    styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle(name='Center', alignment=TA_CENTER))
-    styles.add(ParagraphStyle(name='Justify', alignment=TA_JUSTIFY, fontSize=10))
-    
-    # Título principal
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=24,
-        textColor=colors.HexColor('#764ba2'),
-        spaceAfter=30,
-        alignment=TA_CENTER
-    )
-    
-    elements.append(Paragraph(f"Reporte de Moderación", title_style))
-    elements.append(Paragraph(f"Canal: {canal_actual.nombre}", styles['Center']))
-    elements.append(Spacer(1, 12))
-    
-    # Información del usuario
-    user_info_style = ParagraphStyle(
-        'UserInfo',
-        parent=styles['Heading2'],
-        fontSize=16,
-        textColor=colors.HexColor('#667eea'),
-        spaceAfter=12
-    )
-    
-    elements.append(Paragraph(f"Usuario: {nombre_usuario}", user_info_style))
-    elements.append(Paragraph(f"Fecha del reporte: {timezone.now().strftime('%d/%m/%Y %H:%M')}", styles['Normal']))
-    elements.append(Spacer(1, 20))
-    
-    # Resumen estadístico
+    # Estadísticas
     total_baneos = baneos.count()
     baneos_activos = baneos.filter(activo=True).count()
     
-    elements.append(Paragraph("Resumen de Infracciones", styles['Heading2']))
-    elements.append(Spacer(1, 12))
+    # Contexto para el template
+    context = {
+        'nombre_usuario': nombre_usuario,
+        'canal': canal_actual,
+        'baneos': baneos,
+        'total_baneos': total_baneos,
+        'baneos_activos': baneos_activos,
+        'fecha_reporte': timezone.now(),
+        'es_reincidente': total_baneos > 1,
+    }
     
-    resumen_data = [
-        ['Métrica', 'Cantidad'],
-        ['Total de Infracciones', str(total_baneos)],
-        ['Sanciones Activas', str(baneos_activos)],
-        ['Sanciones Completadas', str(total_baneos - baneos_activos)],
-        ['Estado', 'REINCIDENTE' if total_baneos > 1 else 'Primera infracción'],
-    ]
+    # Renderizar el template HTML
+    html_string = render_to_string('core/pdf/reporte_baneo.html', context)
     
-    resumen_table = Table(resumen_data, colWidths=[3*inch, 2*inch])
-    resumen_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 12),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.whitesmoke, colors.lightgrey]),
-    ]))
+    # Configuración de fuentes
+    font_config = FontConfiguration()
     
-    elements.append(resumen_table)
-    elements.append(Spacer(1, 30))
+    # Generar el PDF con WeasyPrint
+    html = HTML(string=html_string, base_url=request.build_absolute_uri())
     
-    # Historial detallado
-    elements.append(Paragraph("Historial Detallado de Sanciones", styles['Heading2']))
-    elements.append(Spacer(1, 12))
-    
-    for idx, baneo in enumerate(baneos, 1):
-        # Sección para cada baneo
-        baneo_title = Paragraph(
-            f"<b>Infracción #{idx}</b> "
-            f"({'⚠️ ACTIVO' if baneo.activo else '✓ Completado'})",
-            styles['Heading3']
-        )
-        elements.append(baneo_title)
-        elements.append(Spacer(1, 8))
+    # CSS personalizado para el PDF
+    css = CSS(string='''
+        @page {
+            size: A4;
+            margin: 2cm;
+            @top-right {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 10px;
+                color: #666;
+            }
+        }
         
-        # Detalles del baneo en tabla
-        baneo_data = [
-            ['Fecha', baneo.fecha_baneo.strftime('%d/%m/%Y %H:%M')],
-            ['Estado', 'ACTIVO' if baneo.activo else 'Completado'],
-        ]
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
         
-        if baneo.desbaneo:
-            baneo_data.append(['Fecha de Desbaneo', baneo.desbaneo.strftime('%d/%m/%Y %H:%M')])
+        .page-break {
+            page-break-after: always;
+        }
         
-        if baneo.user:
-            baneo_data.append(['Moderador', str(baneo.user.username)])
-        
-        baneo_table = Table(baneo_data, colWidths=[2*inch, 3.5*inch])
-        baneo_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f3f4f6')),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ]))
-        
-        elements.append(baneo_table)
-        elements.append(Spacer(1, 8))
-        
-        # Motivo del baneo
-        elements.append(Paragraph("<b>Motivo:</b>", styles['Normal']))
-        motivo_text = Paragraph(baneo.motivo, styles['Justify'])
-        elements.append(motivo_text)
-        
-        elements.append(Spacer(1, 20))
-        
-        # Añadir página nueva cada 2 baneos (excepto el último)
-        if idx % 2 == 0 and idx < len(baneos):
-            elements.append(PageBreak())
+        /* Asegurar que las imágenes se muestren correctamente */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+    ''', font_config=font_config)
     
-    # Pie de página con información
-    elements.append(Spacer(1, 30))
-    footer_style = ParagraphStyle(
-        'Footer',
-        parent=styles['Normal'],
-        fontSize=8,
-        textColor=colors.grey,
-        alignment=TA_CENTER
-    )
-    elements.append(Paragraph(
-        f"Reporte generado por Sistema de Moderación Judivero - {canal_actual.nombre}",
-        footer_style
-    ))
-    elements.append(Paragraph(
-        f"Este documento contiene información confidencial de moderación",
-        footer_style
-    ))
+    # Generar PDF
+    pdf_file = html.write_pdf(stylesheets=[css], font_config=font_config)
     
-    # Construir el PDF
-    doc.build(elements)
-    
-    # Obtener el valor del buffer y crear la respuesta
-    pdf = buffer.getvalue()
-    buffer.close()
-    
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="reporte_{nombre_usuario}_{canal_actual.nombre}_{timezone.now().strftime("%Y%m%d")}.pdf"'
-    response.write(pdf)
+    # Crear respuesta HTTP
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="reporte_{nombre_usuario}_{canal_actual.nombre}_{timezone.now().strftime("%Y%m%d_%H%M")}.pdf"'
     
     return response
+
 
 @login_required
 def buscar_usuario(request):

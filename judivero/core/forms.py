@@ -109,3 +109,9 @@ class BaneoForm(forms.ModelForm):
             'desbaneo': 'Deja en blanco si el baneo es permanente.',
             'imagen': 'Sube una captura de pantalla como evidencia.',
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Hacer que la imagen sea opcional
+        self.fields['imagen'].required = False
+        self.fields['desbaneo'].required = False
